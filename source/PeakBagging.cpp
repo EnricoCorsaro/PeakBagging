@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    File::snifFile(inputFile, Nrows, Ncols);
+    File::sniffFile(inputFile, Nrows, Ncols);
     data = File::arrayXXdFromFile(inputFile, Nrows, Ncols);
     inputFile.close();
 
