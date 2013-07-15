@@ -1,12 +1,13 @@
 // Main code for peak bagging by means of nested sampling analysis
 // Created by Enrico Corsaro @ IvS - 24 January 2013
 // e-mail: enrico.corsaro@ster.kuleuven.be
-// Source code file "peakbagging.cpp"
+// Source code file "PeakBagging.cpp"
 
 #include <cstdlib>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <Eigen/Dense>
 #include "Functions.h"
 #include "File.h"
 #include "MultiEllipsoidSampler.h"
@@ -16,7 +17,6 @@
 #include "UniformPrior.h"
 #include "NormalPrior.h"
 #include "ExponentialLikelihood.h"
-#include "LorentzianModel.h"
 #include "RegularPatternModel.h"
 #include "Results.h"
 #include "Ellipsoid.h"
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
     int Norders = 4;            // Number of radial orders expected in the PSD
     int Ndimensions = 4;        // Number of free parameters (dimensions) of the problem
-    vector<Prior*> ptrPriorsVector(1);
+    vector<Prior*> ptrPriors(1);
     
     ///*
     ArrayXd parametersMinima(Ndimensions);
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     parametersMinima <<  223.0, 14.0, 1.5, -1.0;         // nuMax, DeltaNu, deltaNu02, deltaNu01
     parametersMaxima << 230.0, 20.0, 4.5, 1.0;
     UniformPrior uniformPrior(parametersMinima, parametersMaxima);
-    ptrPriorsVector[0] = &uniformPrior;
+    ptrPriors[0] = &uniformPrior;
     //*/
 
     /*
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     parametersMean << 12.0,1.4,1.5;
     parametersSDV << 2.0,0.5,0.5;
     NormalPrior normalPrior(parametersMean, parametersSDV);
-    ptrPriorsVector[0] = &normalPrior;
+    ptrPriors[0] = &normalPrior;
     */ 
 
 
@@ -103,20 +103,19 @@ int main(int argc, char *argv[])
     KmeansClusterer kmeans(myMetric, minNclusters, maxNclusters, Ntrials, relTolerance); 
 
 
-    // Fifth step - Start nested sampling process
+    // Start nested sampling process
     
-    bool printOnTheScreen = true;               // Print results on the screen 
-    int NloopMaximum = 5000;                    // Maximum number of attempts when drawing a new active point subject to likelihood constraint
-    int Nobjects = 300;                        // Number of active points used in the nesting process
-    int NiterationsBeforeClustering = 50;        // Number of nesting iterations before executing clustering algorithm again
-    double initialEnlargementFactor = 3.0;      // The initial value for the enlargement factor of the ellipsoids
-    double alpha = 0.6;                         // Exponent for shrinkage rate of the ellipsoid enlargement factor
-    double terminationFactor = 0.05;            // Termination factor for nesting process
+    bool printOnTheScreen = true;               // Print results on the screen
+    int Nobjects = 200;                         // 
+    int maxNdrawAttempts = 1000;                // Maximum number of attempts when trying to draw a new sampling point
+    int NiterationsBeforeClustering = 10;       // Number of nesting iterations before executing clustering algorithm again
+    double initialEnlargementFactor = 2.0;      // 
+    double shrinkingRate = 0.6;                 // Exponent for remaining prior mass in ellipsoid enlargement factor
+    double terminationFactor = 0.01;            // Termination factor for nesting loop
 
-    MultiEllipsoidSampler nestedSampler(printOnTheScreen, ptrPriorsVector, 
-                                        likelihood, myMetric, kmeans, 
-                                        Nobjects, initialEnlargementFactor, alpha);
-    nestedSampler.run(terminationFactor, NiterationsBeforeClustering, NloopMaximum);
+    MultiEllipsoidSampler nestedSampler(printOnTheScreen, ptrPriors, likelihood, myMetric, kmeans, 
+                                        Nobjects, initialEnlargementFactor, shrinkingRate);
+    nestedSampler.run(terminationFactor, NiterationsBeforeClustering, maxNdrawAttempts);
 
 
     // Save the results in output files
@@ -124,10 +123,10 @@ int main(int argc, char *argv[])
     Results results(nestedSampler);
     string outputDirName(argv[2]);
     results.writeParametersToFile(outputDirName + "/parameter");
-    results.writeLogLikelihoodToFile(outputDirName + "/likelihood.txt");
-    results.writeEvidenceInformationToFile(outputDirName + "/evidence.txt");
-    results.writePosteriorProbabilityToFile(outputDirName + "/posterior.txt");
-    results.writeParameterEstimationToFile(outputDirName + "/parameters_estimation.txt");
-    
+    results.writeLogLikelihoodToFile(outputDirName + "/likelihoodDistribution.txt");
+    results.writeEvidenceInformationToFile(outputDirName + "/evidenceInformation.txt");
+    results.writePosteriorProbabilityToFile(outputDirName + "/posteriorDistribution.txt");
+    results.writeParametersSummaryToFile(outputDirName + "/parameterSummary.txt");
+
     return EXIT_SUCCESS;
 }
