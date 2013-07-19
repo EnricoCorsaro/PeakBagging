@@ -20,7 +20,7 @@ class RegularPatternModel : public Model
 {
     public:
     
-        RegularPatternModel(const RefArrayXd covariates, const int Norders);
+        RegularPatternModel(const RefArrayXd covariates, const int NradialOrders);
         ~RegularPatternModel();
 
         virtual void predict(RefArrayXd predictions, const RefArrayXd modelParameters);
@@ -28,12 +28,24 @@ class RegularPatternModel : public Model
        
 
     protected:
+        
+        double computeSinglePmodeFrequency(int relativeRadialOrder, double frequencyOfCentralRadialMode, 
+                                           double DeltaNu, double deltaNu02, double epsilon, int angularDegree);
+        void computePmodeFrequencies(vector<int> relativeRadialOrders, double frequencyOfCentralRadialMode, 
+                                            double DeltaNu, double deltaNu02);
+        // void computeMixedDipoleModeFrequencies(double frequencyOfCentralRadialMode, double DeltaNu, double DeltaPi1,
+        //                                        vector<int> relativeRadialOrders, double couplingFactor){};
+
 
 
     private:
 
-        int Norders;
-        int Nparameters;
+        int NradialOrders;                              // The number of radial orders of the model
+        int Nparameters;                                // The number of free parameters of the model
+        int radialOrderOfCentralRadialMode;             // The radial order of the central radial mode
+        vector<double> frequenciesOfPmodes;
+        vector<double> angularDegreesOfPmodes;
+        vector<double> radialOrdersOfPmodes;
    
 
 }; // END class RegularPatternModel
