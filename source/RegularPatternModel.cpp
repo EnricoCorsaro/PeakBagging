@@ -107,6 +107,8 @@ void RegularPatternModel::predict(RefArrayXd predictions, const RefArrayXd model
                 continue;
         }
     }
+
+    predictions += 0.01;
     
     //computePmodeFrequencies(relativeRadialOrders, frequencyOfCentralRadialMode, DeltaNu, deltaNu02);
 
