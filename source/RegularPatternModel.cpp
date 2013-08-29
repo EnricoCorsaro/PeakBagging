@@ -70,7 +70,7 @@ RegularPatternModel::~RegularPatternModel()
 //      (1) Frequency of central radial order
 //      (2) Large frequency separation (DeltaNu)
 //      (3) Small frequency separation 02 (deltaNu02)
-//      (4) ...
+//      (4) White noise background (noiseLevel)
 
 void RegularPatternModel::predict(RefArrayXd predictions, const RefArrayXd modelParameters)
 {
@@ -79,6 +79,7 @@ void RegularPatternModel::predict(RefArrayXd predictions, const RefArrayXd model
     double frequencyOfCentralRadialMode = modelParameters(0);
     double DeltaNu = modelParameters(1);
     double deltaNu02 = modelParameters(2);
+    double noiseLevel = modelParameters(3);
     
     vector<int> relativeRadialOrders(NradialOrders);
     ArrayXd modes = ArrayXd::Zero(predictions.size());
@@ -86,7 +87,7 @@ void RegularPatternModel::predict(RefArrayXd predictions, const RefArrayXd model
     double height = 16.0;
     double linewidth = 0.4;
 
-    // radialOrderOfCentralRadialMode = floor(frequencyOfCentralRadialMode / DeltaNu);
+    radialOrderOfCentralRadialMode = floor(frequencyOfCentralRadialMode / DeltaNu);
     double epsilon = frequencyOfCentralRadialMode / DeltaNu - fmod(frequencyOfCentralRadialMode, DeltaNu);
     
     for (int i=0; i < relativeRadialOrders.size(); ++i)
@@ -95,13 +96,13 @@ void RegularPatternModel::predict(RefArrayXd predictions, const RefArrayXd model
 
         for (int j=0; j < 4; ++j)
         {
-            double frequencyOfPmode = frequencyOfCentralRadialMode + relativeRadialOrders[i]*DeltaNu;
-            // computeSinglePmodeFrequency(relativeRadialOrders[i], frequencyOfCentralRadialMode,
-                                       //  DeltaNu, deltaNu02, epsilon, j);
+            double frequencyOfPmode = computeSinglePmodeFrequency(relativeRadialOrders[i], frequencyOfCentralRadialMode,
+                                                                  DeltaNu, deltaNu02, epsilon, j);
             if (frequencyOfPmode >= covariates.minCoeff() && frequencyOfPmode <= covariates.maxCoeff())
             {
                 Functions::modeProfile(modes, covariates, frequencyOfPmode, height, linewidth);
                 predictions += modes;
+
             }
             else
                 continue;
@@ -118,6 +119,8 @@ void RegularPatternModel::predict(RefArrayXd predictions, const RefArrayXd model
         predictions += modes;
     }
     */
+    
+    predictions += noiseLevel;
 
 }
 
@@ -209,8 +212,8 @@ double RegularPatternModel::computeSinglePmodeFrequency(int relativeRadialOrder,
     // Compute the first order term of the Tassoul's asymptotic relation in units of DeltaNu
 
     double linearTerm = relativeRadialOrder + radialOrderOfCentralRadialMode + epsilon + angularDegree/2.0 - constantDell;
-    
-    
+   
+
     // Compute the second order term of the Tassoul's asymptotic relation in units of DeltaNu
     
     double quadraticTerm = alphaCorrection/2.0 * relativeRadialOrder * relativeRadialOrder;

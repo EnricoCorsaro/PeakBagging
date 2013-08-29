@@ -60,14 +60,14 @@ int main(int argc, char *argv[])
     // First step - Setting Prior distribution and parameter space
 
     int NradialOrders = 5;          // Number of radial orders expected in the PSD
-    int Ndimensions = 3;            // Number of free parameters (dimensions) of the problem
+    int Ndimensions = 4;            // Number of free parameters (dimensions) of the problem
     vector<Prior*> ptrPriors(1);
     
     ///*
     ArrayXd parametersMinima(Ndimensions);
     ArrayXd parametersMaxima(Ndimensions);
-    parametersMinima <<  223.0, 14.0, 1.5;         // nuMax, DeltaNu, deltaNu02
-    parametersMaxima << 230.0, 20.0, 4.5;
+    parametersMinima <<  223.0, 14.0, 1.5, 0.1;         // nuMax, DeltaNu, deltaNu02, noiseLevel
+    parametersMaxima << 230.0, 20.0, 4.5, 1.0;
     UniformPrior uniformPrior(parametersMinima, parametersMaxima);
     ptrPriors[0] = &uniformPrior;
     //*/
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     
     bool printOnTheScreen = true;               // Print results on the screen
     int Nobjects = 200;                         // 
-    int maxNdrawAttempts = 1000;                // Maximum number of attempts when trying to draw a new sampling point
+    int maxNdrawAttempts = 5000;                // Maximum number of attempts when trying to draw a new sampling point
     int NiterationsBeforeClustering = 10;       // Number of nesting iterations before executing clustering algorithm again
     double initialEnlargementFactor = 2.0;      // 
     double shrinkingRate = 0.6;                 // Exponent for remaining prior mass in ellipsoid enlargement factor
@@ -119,7 +119,6 @@ int main(int argc, char *argv[])
 
 
     // Save the results in output files
-    cerr << "!!!!!!!HERE!!!!!!!!" << endl;
     
     Results results(nestedSampler);
     string outputDirName(argv[2]);
