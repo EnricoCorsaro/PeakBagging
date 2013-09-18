@@ -87,24 +87,3 @@ void LorentzianModel::predict(RefArrayXd predictions, RefArrayXd const modelPara
         exit(EXIT_FAILURE);
     }
 }
-
-
-
-
-
-
-
-// LorentzianModel::getNparameters()
-//
-// PURPOSE: 
-//      Get the private data member Nparameters;
-//
-// OUTPUT:
-//      Returns an integer containing the total number of 
-//      free parameters used in the model.
-//
-
-int LorentzianModel::getNparameters()
-{
-    return Nparameters;
-}
