@@ -270,17 +270,18 @@ int main(int argc, char *argv[])
 
     // Start nested sampling process
     
-    bool printOnTheScreen = true;               // Print results on the screen
-    int Nobjects = 400;                         // 
-    int maxNdrawAttempts = 20000;               // Maximum number of attempts when trying to draw a new sampling point
-    int NiterationsBeforeClustering = 20;       // Number of nesting iterations before executing clustering algorithm again
-    double initialEnlargementFactor = 10.0;      // 
-    double shrinkingRate = 0.8;                 // Exponent for remaining prior mass in ellipsoid enlargement factor
-    double terminationFactor = 0.05;            // Termination factor for nesting loop
+    bool printOnTheScreen = true;                   // Print results on the screen
+    int Nobjects = 400;                             // TODO 
+    int maxNdrawAttempts = 20000;                   // Maximum number of attempts when trying to draw a new sampling point
+    int NinitialIterationsWithoutClustering = 100;  // The first N iterations, we assume that there is only 1 cluster
+    int NiterationsWithSameClustering = 25;         // Clustering is only happening every X iterations.
+    double initialEnlargementFactor = 10.0;         // TODO 
+    double shrinkingRate = 0.8;                     // Exponent for remaining prior mass in ellipsoid enlargement factor
+    double terminationFactor = 0.05;                // Termination factor for nesting loop
 
     MultiEllipsoidSampler nestedSampler(printOnTheScreen, ptrPriors, likelihood, myMetric, kmeans, 
                                         Nobjects, initialEnlargementFactor, shrinkingRate);
-    nestedSampler.run(terminationFactor, NiterationsBeforeClustering, maxNdrawAttempts);
+    nestedSampler.run(terminationFactor, NinitialIterationsWithoutClustering, NiterationsWithSameClustering, maxNdrawAttempts);
 
 
     // Save the results in output files
