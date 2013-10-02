@@ -96,15 +96,13 @@ RegularPatternModel::~RegularPatternModel()
 //      (3) Large frequency separation (DeltaNu)
 //      (4) Small frequency separation 02 (deltaNu02)
 //      (5) Small frequency separation 01 (deltaNu01)
-//      (5) Mode profile heights
+//      (5) Mode profile ln(heights)
 //      (6) Mode profile linewidths
 
 void RegularPatternModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
 {
     Nparameters = modelParameters.size();
     ArrayXd pressureModePrediction = ArrayXd::Zero(covariates.size());
-    //double linewidth = 0.15;
-    cout << modelParameters << endl;
 
     for (int radialOrder = 0; radialOrder < NradialOrders; ++radialOrder)
     {
@@ -119,10 +117,9 @@ void RegularPatternModel::predict(RefArrayXd predictions, RefArrayXd const model
             if ((frequencyOfPmode > covariates.minCoeff()) && (frequencyOfPmode < covariates.maxCoeff()))
             {
                 Functions::modeProfile(pressureModePrediction, covariates, frequencyOfPmode, 
-                                       modelParameters(NglobalParameters + 3*NradialOrders + radialOrder + angularDegree), 
+                                       exp(modelParameters(NglobalParameters + 3*NradialOrders + radialOrder + angularDegree)), 
                                        modelParameters(NglobalParameters + 3*NradialOrders + NpressureModes + 
                                        radialOrder + angularDegree));
-                                       //linewidth);
                 predictions += pressureModePrediction;
             }
             else
@@ -132,8 +129,6 @@ void RegularPatternModel::predict(RefArrayXd predictions, RefArrayXd const model
         }
     }
 
-    predictions += 0.01;
-    
     predictions += modelParameters(1);           // Add flat noise level component
 
 }
