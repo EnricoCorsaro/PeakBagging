@@ -114,8 +114,8 @@ int main(int argc, char *argv[])
     ArrayXd deltaNu01Minima = ArrayXd::Zero(NradialOrders);             // Small frequency spacing deltaNu01
     deltaNu01Minima += -0.6;
     
-    ArrayXd heightsMinima = ArrayXd::Zero(NradialOrders*NangularDegrees);              // Heights
-    heightsMinima += 100.0;
+    ArrayXd naturalLogarithmOfHeightsMinima = ArrayXd::Zero(NradialOrders*NangularDegrees);              // Heights
+    naturalLogarithmOfHeightsMinima += 4.6;
     
     ArrayXd linewidthsMinima = ArrayXd::Zero(NradialOrders*NangularDegrees);           // Linewidths
     linewidthsMinima += 0.05;
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     parametersMinima.segment(NglobalParameters, NradialOrders) = DeltaNuMinima;
     parametersMinima.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02Minima;
     parametersMinima.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01Minima;
-    parametersMinima.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = heightsMinima;
+    parametersMinima.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsMinima;
     parametersMinima.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsMinima;
     
     ArrayXd parametersMaxima(Ndimensions);                              // Maxima
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     double referenceFrequencyMaximum = referenceDeltaNu/2.;
     parametersMaxima(0) = referenceFrequencyMaximum;
     
-    double noiseLevelMaximum = 100;
+    double noiseLevelMaximum = 30;
     parametersMaxima(1) = noiseLevelMaximum; 
     
     ArrayXd DeltaNuMaxima = ArrayXd::Zero(NradialOrders);
@@ -143,8 +143,8 @@ int main(int argc, char *argv[])
     ArrayXd deltaNu01Maxima = ArrayXd::Zero(NradialOrders);
     deltaNu01Maxima += 0.1;
     
-    ArrayXd heightsMaxima = ArrayXd::Zero(NradialOrders*NangularDegrees);
-    heightsMaxima += 4000.0;
+    ArrayXd naturalLogarithmOfHeightsMaxima = ArrayXd::Zero(NradialOrders*NangularDegrees);
+    naturalLogarithmOfHeightsMaxima += 8.01;
     
     ArrayXd linewidthsMaxima = ArrayXd::Zero(NradialOrders*NangularDegrees);
     linewidthsMaxima += 0.5;
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     parametersMaxima.segment(NglobalParameters, NradialOrders) = DeltaNuMaxima;
     parametersMaxima.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02Maxima;
     parametersMaxima.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01Maxima;
-    parametersMaxima.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = heightsMaxima;
+    parametersMaxima.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsMaxima;
     parametersMaxima.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsMaxima;
     
     UniformPrior uniformPrior(parametersMinima, parametersMaxima);
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 
     EuclideanMetric myMetric;
     int minNclusters = 1;
-    int maxNclusters = 10;
+    int maxNclusters = 20;
     int Ntrials = 10;
     double relTolerance = 0.01;
 
@@ -271,16 +271,19 @@ int main(int argc, char *argv[])
     // Start nested sampling process
     
     bool printOnTheScreen = true;                   // Print results on the screen
-    int Nobjects = 400;                             // TODO 
-    int maxNdrawAttempts = 20000;                   // Maximum number of attempts when trying to draw a new sampling point
-    int NinitialIterationsWithoutClustering = 100;  // The first N iterations, we assume that there is only 1 cluster
-    int NiterationsWithSameClustering = 25;         // Clustering is only happening every X iterations.
-    double initialEnlargementFactor = 10.0;         // TODO 
-    double shrinkingRate = 0.8;                     // Exponent for remaining prior mass in ellipsoid enlargement factor
-    double terminationFactor = 0.05;                // Termination factor for nesting loop
+    int Nobjects = 200;                            // Number of active points evolving within the nested sampling process. 
+    int maxNdrawAttempts = 10000;                   // Maximum number of attempts when trying to draw a new sampling point
+    int NinitialIterationsWithoutClustering = 1000;  // The first N iterations, we assume that there is only 1 cluster
+    int NiterationsWithSameClustering = 50;         // Clustering is only happening every X iterations.
+    double initialEnlargementFraction = 0.50;       // Fraction by which each axis in an ellipsoid has to be enlarged.
+                                                    // It can be a number >= 0, where 0 means no enlargement.
+    double shrinkingRate = 0.8;                     // Exponent for remaining prior mass in ellipsoid enlargement fraction.
+                                                    // It is a number between 0 and 1. The smaller the slower the shrinkage
+                                                    // of the ellipsoids.
+    double terminationFactor = 0.05;                // Termination factor for nested sampling process.
 
     MultiEllipsoidSampler nestedSampler(printOnTheScreen, ptrPriors, likelihood, myMetric, kmeans, 
-                                        Nobjects, initialEnlargementFactor, shrinkingRate);
+                                        Nobjects, initialEnlargementFraction, shrinkingRate);
     nestedSampler.run(terminationFactor, NinitialIterationsWithoutClustering, NiterationsWithSameClustering, maxNdrawAttempts);
 
 
