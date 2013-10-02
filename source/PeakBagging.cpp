@@ -105,20 +105,20 @@ int main(int argc, char *argv[])
     double noiseLevelMinimum = 10;                                      // Flat noise level
     parametersMinima(1) = noiseLevelMinimum;
 
-    ArrayXd DeltaNuMinima = ArrayXd::Zero(NradialOrders);               // Large frequency spacing DeltaNu
-    DeltaNuMinima += 10.0;
+    ArrayXd DeltaNuMinima(NradialOrders);                               // Large frequency spacing DeltaNu
+    DeltaNuMinima.fill(10.0);
     
-    ArrayXd deltaNu02Minima = ArrayXd::Zero(NradialOrders);             // Small frequency spacing deltaNu02
-    deltaNu02Minima += 0.6;
+    ArrayXd deltaNu02Minima(NradialOrders);                             // Small frequency spacing deltaNu02
+    deltaNu02Minima.fill(0.6);
     
-    ArrayXd deltaNu01Minima = ArrayXd::Zero(NradialOrders);             // Small frequency spacing deltaNu01
-    deltaNu01Minima += -0.6;
+    ArrayXd deltaNu01Minima(NradialOrders);                             // Small frequency spacing deltaNu01
+    deltaNu01Minima.fill(-0.6);
     
-    ArrayXd naturalLogarithmOfHeightsMinima = ArrayXd::Zero(NradialOrders*NangularDegrees);              // Heights
-    naturalLogarithmOfHeightsMinima += 4.6;
+    ArrayXd naturalLogarithmOfHeightsMinima(NradialOrders*NangularDegrees);              // Natural logarithm of Heights
+    naturalLogarithmOfHeightsMinima.fill(4.6);
     
-    ArrayXd linewidthsMinima = ArrayXd::Zero(NradialOrders*NangularDegrees);           // Linewidths
-    linewidthsMinima += 0.05;
+    ArrayXd linewidthsMinima(NradialOrders*NangularDegrees);            // Linewidths
+    linewidthsMinima.fill(0.05);
     
     parametersMinima.segment(NglobalParameters, NradialOrders) = DeltaNuMinima;
     parametersMinima.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02Minima;
@@ -134,20 +134,20 @@ int main(int argc, char *argv[])
     double noiseLevelMaximum = 30;
     parametersMaxima(1) = noiseLevelMaximum; 
     
-    ArrayXd DeltaNuMaxima = ArrayXd::Zero(NradialOrders);
-    DeltaNuMaxima += 12.0;
+    ArrayXd DeltaNuMaxima(NradialOrders);
+    DeltaNuMaxima.fill(12.0);
     
-    ArrayXd deltaNu02Maxima = ArrayXd::Zero(NradialOrders);
-    deltaNu02Maxima += 1.8;
+    ArrayXd deltaNu02Maxima(NradialOrders);
+    deltaNu02Maxima.fill(1.8);
     
-    ArrayXd deltaNu01Maxima = ArrayXd::Zero(NradialOrders);
-    deltaNu01Maxima += 0.1;
+    ArrayXd deltaNu01Maxima(NradialOrders);
+    deltaNu01Maxima.fill(0.1);
     
-    ArrayXd naturalLogarithmOfHeightsMaxima = ArrayXd::Zero(NradialOrders*NangularDegrees);
-    naturalLogarithmOfHeightsMaxima += 8.01;
+    ArrayXd naturalLogarithmOfHeightsMaxima(NradialOrders*NangularDegrees);
+    naturalLogarithmOfHeightsMaxima.fill(8.01);
     
-    ArrayXd linewidthsMaxima = ArrayXd::Zero(NradialOrders*NangularDegrees);
-    linewidthsMaxima += 0.5;
+    ArrayXd linewidthsMaxima(NradialOrders*NangularDegrees);
+    linewidthsMaxima.fill(0.5);
     
     parametersMaxima.segment(NglobalParameters, NradialOrders) = DeltaNuMaxima;
     parametersMaxima.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02Maxima;
