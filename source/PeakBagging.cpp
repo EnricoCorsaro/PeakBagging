@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     int NradialOrders = 1; 
     NparametersPerType[2] = NradialOrders;                          // Number of radial orders expected in the PSD
     
-    int NangularDegrees = 3;
+    int NangularDegrees = 1;
     NparametersPerType[3] = NangularDegrees;                        // Maximum number of angular degrees to be fitted
                                                                     // N.B this number can differ from the product NangularDegrees*NradialOrders
     int NmixedModes = 0;
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     double referenceFrequencyMinimum = -referenceDeltaNu/2. - referenceDeltaNu*0.1;            // Frequency of central radial mode
     parametersMinima(0) = referenceFrequencyMinimum;
     
-    double noiseLevelMinimum = 10;                                      // Flat noise level
+    double noiseLevelMinimum = 5;                                      // Flat noise level
     parametersMinima(1) = noiseLevelMinimum;
 
     ArrayXd DeltaNuMinima(NradialOrders);                               // Large frequency spacing DeltaNu
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     double referenceFrequencyMaximum = referenceDeltaNu/2.;
     parametersMaxima(0) = referenceFrequencyMaximum;
     
-    double noiseLevelMaximum = 30;
+    double noiseLevelMaximum = 20;
     parametersMaxima(1) = noiseLevelMaximum; 
     
     ArrayXd DeltaNuMaxima(NradialOrders);
@@ -163,93 +163,100 @@ int main(int argc, char *argv[])
     // Normal Prior
     /*
     ArrayXd parametersMean(Ndimensions);
-    ArrayXd parametersSDV(Ndimensions);
-    ArrayXd DeltaNuMean = ArrayXd::Zero(NradialOrders);
-    ArrayXd DeltaNuSDV = ArrayXd::Zero(NradialOrders);
-    ArrayXd deltaNu02Mean = ArrayXd::Zero(NradialOrders);
-    ArrayXd deltaNu02SDV = ArrayXd::Zero(NradialOrders);
-    ArrayXd heightsMean = ArrayXd::Zero(NradialOrders*NangularDegrees);
-    ArrayXd heightsSDV = ArrayXd::Zero(NradialOrders*NangularDegrees);
-    double nuMaxMean = 26.0;
-    double nuMaxSDV = 30.0;
-    double noiseLevelMean = 0.1;
-    double noiseLevelSDV = 20;
     
-    parametersMean(0) = nuMaxMean;
+    double referenceFrequencyMean = 1.0;
+    parametersMean(0) = referenceFrequencyMean;
+    
+    double noiseLevelMean = 0.1;
     parametersMean(1) = noiseLevelMean; 
-    DeltaNuMean += 2.5;
-    deltaNu02Mean += 0.1;
-    heightsMean += 100.0;        
+    
+    ArrayXd DeltaNuMean(NradialOrders);
+    DeltaNuMean.fill(2.5);
+
+    ArrayXd deltaNu02Mean(NradialOrders);
+    deltaNu02Mean.fill(0.1);
+    
+    ArrayXd deltaNu01Mean(NradialOrders);
+    deltaNu01Mean.fill(0.0);
+
+    ArrayXd naturalLogarithmOfHeightsMean(NradialOrders*NangularDegrees);
+    naturalLogarithmOfHeightsMean.fill(5.0);        
+    
+    ArrayXd linewidthsMean(NradialOrders*NangularDegrees);
+    linewidthsMean.fill(0.15);
+    
     parametersMean.segment(NglobalParameters, NradialOrders) = DeltaNuMean;
     parametersMean.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02Mean;
-    parametersMean.segment(NglobalParameters + 2*NradialOrders, NradialOrders*NangularDegrees) = heightsMean;
+    parametersMean.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01Mean;
+    parametersMean.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsMean;
+    parametersMean.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsMean;
     
-    parametersSDV(0) = nuMaxSDV;
+    double referenceFrequencySDV = 5.0;
+    parametersSDV(0) = referenceFrequencySDV;
+    
+    double noiseLevelSDV = 10;
     parametersSDV(1) = noiseLevelSDV; 
-    DeltaNuSDV += 2.5;
-    deltaNu02SDV += 0.1;
-    heightsSDV += 100.0;        
+    
+    ArrayXd parametersSDV(Ndimensions);
+
+    ArrayXd DeltaNuSDV(NradialOrders);
+    DeltaNuSDV.fill(2.5);
+    
+    ArrayXd deltaNu02SDV(NradialOrders);
+    deltaNu02SDV.fill(0.05);
+    
+    ArrayXd deltaNu01SDV(NradialOrders);
+    deltaNu01SDV.fill(0.03);
+    
+    ArrayXd naturalLogarithmOfHeightsSDV(NradialOrders*NangularDegrees);
+    naturalLogarithmOfHeightsSDV.fill(2.0);
+    
+    ArrayXd linewidthsSDV(NradialOrders*NangularDegrees);
+    linewidthsSDV.fill(0.3);
+    
     parametersSDV.segment(NglobalParameters, NradialOrders) = DeltaNuSDV;
     parametersSDV.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02SDV;
-    parametersSDV.segment(NglobalParameters + 2*NradialOrders, NradialOrders*NangularDegrees) = heightsSDV;
+    parametersSDV.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01SDV;
+    parametersSDV.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsSDV;
+    parametersSDV.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsSDV;
     
     NormalPrior normalPrior(parametersMean, parametersSDV);
     ptrPriors[0] = &normalPrior;
-    */ 
 
+    
     // Super-Gaussian Prior
-    /*
-    ArrayXd parametersMean(Ndimensions);
-    ArrayXd parametersSDV(Ndimensions);
     ArrayXd parametersWOP(Ndimensions);
-    ArrayXd DeltaNuMean = ArrayXd::Zero(NradialOrders);
-    ArrayXd DeltaNuSDV = ArrayXd::Zero(NradialOrders);
-    ArrayXd DeltaNuWOP = ArrayXd::Zero(NradialOrders);
-    ArrayXd deltaNu02Mean = ArrayXd::Zero(NradialOrders);
-    ArrayXd deltaNu02SDV = ArrayXd::Zero(NradialOrders);
-    ArrayXd deltaNu02WOP = ArrayXd::Zero(NradialOrders);
-    ArrayXd heightsMean = ArrayXd::Zero(NradialOrders*NangularDegrees);
-    ArrayXd heightsSDV = ArrayXd::Zero(NradialOrders*NangularDegrees);
-    ArrayXd heightsWOP = ArrayXd::Zero(NradialOrders*NangularDegrees);
-    double nuMaxMean = 26.0;
-    double nuMaxSDV = 30.0;
-    double nuMaxWOP = 30.0;
-    double noiseLevelMean = 0.1;
-    double noiseLevelSDV = 20;
+    
+    double referenceFrequencyWOP = 30.0;
+    parametersWOP(0) = referenceFrequencyWOP;
+    
     double noiseLevelWOP = 20;
-    
-    parametersMean(0) = nuMaxMean;
-    parametersMean(1) = noiseLevelMean; 
-    DeltaNuMean += 2.5;
-    deltaNu02Mean += 0.1;
-    heightsMean += 100.0;        
-    parametersMean.segment(NglobalParameters, NradialOrders) = DeltaNuMean;
-    parametersMean.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02Mean;
-    parametersMean.segment(NglobalParameters + 2*NradialOrders, NradialOrders*NangularDegrees) = heightsMean;
-    
-    parametersSDV(0) = nuMaxSDV;
-    parametersSDV(1) = noiseLevelSDV; 
-    DeltaNuSDV += 2.5;
-    deltaNu02SDV += 0.1;
-    heightsSDV += 100.0;        
-    parametersSDV.segment(NglobalParameters, NradialOrders) = DeltaNuSDV;
-    parametersSDV.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02SDV;
-    parametersSDV.segment(NglobalParameters + 2*NradialOrders, NradialOrders*NangularDegrees) = heightsSDV;
-    
-    parametersWOP(0) = nuMaxWOP;
     parametersWOP(1) = noiseLevelWOP; 
-    DeltaNuWOP += 2.5;
-    deltaNu02WOP += 0.1;
-    heightsWOP += 100.0;        
+    
+    ArrayXd DeltaNuWOP(NradialOrders);
+    DeltaNuWOP.fill(2.5);
+    
+    ArrayXd deltaNu02WOP(NradialOrders);
+    deltaNu02WOP.fill(0.1);
+    
+    ArrayXd deltaNu01WOP(NradialOrders);
+    deltaNu01WOP.fill(0.1);
+    
+    ArrayXd naturalLogarithmOfHeightsWOP(NradialOrders*NangularDegrees);
+    naturalLogarithmOfHeightsWOP.fill(4.0);        
+    
+    ArrayXd linewidthsWOP(NradialOrders*NangularDegrees);
+    linewdithsWOP.fill(0.5);
+
     parametersWOP.segment(NglobalParameters, NradialOrders) = DeltaNuWOP;
     parametersWOP.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02WOP;
-    parametersWOP.segment(NglobalParameters + 2*NradialOrders, NradialOrders*NangularDegrees) = heightsWOP;
+    parametersWOP.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01WOP;
+    parametersWOP.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsWOP;
+    parametersWOP.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsWOP;
     
     SuperGaussianPrior superGaussianPrior(parametersMean, parametersSDV, parametersWOP);
     ptrPriors[0] = &superGaussianPrior;
 */
-
-
     
 
     // Third step - Set up the likelihood function to be used
@@ -271,9 +278,9 @@ int main(int argc, char *argv[])
     // Start nested sampling process
     
     bool printOnTheScreen = true;                   // Print results on the screen
-    int Nobjects = 200;                            // Number of active points evolving within the nested sampling process. 
+    int Nobjects = 200;                             // Number of active points evolving within the nested sampling process. 
     int maxNdrawAttempts = 10000;                   // Maximum number of attempts when trying to draw a new sampling point
-    int NinitialIterationsWithoutClustering = 1000;  // The first N iterations, we assume that there is only 1 cluster
+    int NinitialIterationsWithoutClustering = 1000; // The first N iterations, we assume that there is only 1 cluster
     int NiterationsWithSameClustering = 50;         // Clustering is only happening every X iterations.
     double initialEnlargementFraction = 0.50;       // Fraction by which each axis in an ellipsoid has to be enlarged.
                                                     // It can be a number >= 0, where 0 means no enlargement.
