@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     int NradialOrders = 1; 
     NparametersPerType[2] = NradialOrders;                          // Number of radial orders expected in the PSD
     
-    int NangularDegrees = 1;
+    int NangularDegrees = 3;
     NparametersPerType[3] = NangularDegrees;                        // Maximum number of angular degrees to be fitted
                                                                     // N.B this number can differ from the product NangularDegrees*NradialOrders
     int NmixedModes = 0;
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
 
     EuclideanMetric myMetric;
     int minNclusters = 1;
-    int maxNclusters = 20;
+    int maxNclusters = 6;
     int Ntrials = 10;
     double relTolerance = 0.01;
 
@@ -278,19 +278,39 @@ int main(int argc, char *argv[])
     // Start nested sampling process
     
     bool printOnTheScreen = true;                   // Print results on the screen
-    int Nobjects = 200;                             // Number of active points evolving within the nested sampling process. 
+    int initialNobjects = 10000;                     // Number of active points evolving within the nested sampling process. 
+    int minNobjects = 200;
     int maxNdrawAttempts = 10000;                   // Maximum number of attempts when trying to draw a new sampling point
-    int NinitialIterationsWithoutClustering = 1000; // The first N iterations, we assume that there is only 1 cluster
-    int NiterationsWithSameClustering = 50;         // Clustering is only happening every X iterations.
-    double initialEnlargementFraction = 0.50;       // Fraction by which each axis in an ellipsoid has to be enlarged.
+    int NinitialIterationsWithoutClustering = static_cast<int>(initialNobjects*9.5032*0.05);    // The first N iterations, we assume that there is only 1 cluster
+    int NiterationsWithSameClustering = static_cast<int>(initialNobjects*9.5032*0.005);        // Clustering is only happening every X iterations.
+    double initialEnlargementFraction = 1.50;       // Fraction by which each axis in an ellipsoid has to be enlarged.
                                                     // It can be a number >= 0, where 0 means no enlargement.
     double shrinkingRate = 0.8;                     // Exponent for remaining prior mass in ellipsoid enlargement fraction.
                                                     // It is a number between 0 and 1. The smaller the slower the shrinkage
                                                     // of the ellipsoids.
     double terminationFactor = 0.05;                // Termination factor for nested sampling process.
 
+    
+    // Save configuring parameters into an ASCII file
+
+    ofstream outputFile;
+    string fullPath = "peakBagging_configuringParameters.txt";
+    File::openOutputFile(outputFile, fullPath);
+    outputFile << "Initial Nojects: " << initialNobjects << endl;
+    outputFile << "Minimum Nobjects: " << minNobjects << endl;
+    outputFile << "Minimum Nclusters: " << minNclusters << endl;
+    outputFile << "Maximum Nclusters: " << maxNclusters << endl;
+    outputFile << "NinitialIterationsWithoutClustering: " << NinitialIterationsWithoutClustering << endl;
+    outputFile << "NiterationsWithSameClustering: " << NiterationsWithSameClustering << endl;
+    outputFile << "maxNdrawAttempts: " << maxNdrawAttempts << endl;
+    outputFile << "Initial EnlargementFraction: " << initialEnlargementFraction << endl;
+    outputFile << "Shrinking Rate: " << shrinkingRate << endl;
+    outputFile << "terminationFactor: " << terminationFactor << endl;
+    outputFile.close();
+
+
     MultiEllipsoidSampler nestedSampler(printOnTheScreen, ptrPriors, likelihood, myMetric, kmeans, 
-                                        Nobjects, initialEnlargementFraction, shrinkingRate);
+                                        initialNobjects, minNobjects, initialEnlargementFraction, shrinkingRate);
     nestedSampler.run(terminationFactor, NinitialIterationsWithoutClustering, NiterationsWithSameClustering, maxNdrawAttempts);
 
 
