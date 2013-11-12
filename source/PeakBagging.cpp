@@ -17,7 +17,8 @@
 #include "UniformPrior.h"
 #include "NormalPrior.h"
 #include "ExponentialLikelihood.h"
-#include "RegularPatternModel.h"
+#include "LorentzianMixtureModel.h"
+#include "FerozReducer.h"
 #include "Results.h"
 #include "Ellipsoid.h"
 
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
 
     ArrayXd parametersMaxima(Ndimensions);                      // Maxima
     
-    double noiseLevelMaxinum = 20;                              // Flat noise level
+    double noiseLevelMaximum = 20;                              // Flat noise level
     parametersMaxima(0) = noiseLevelMaximum;
 
     ArrayXd centralFrequencyMaxima(Nmodes);                     // Central frequency of oscillation mode
@@ -217,8 +218,8 @@ int main(int argc, char *argv[])
     // Start nested sampling process
     
     bool printOnTheScreen = true;                   // Print results on the screen
-    int initialNobjects = 10000;                     // Number of active points evolving within the nested sampling process. 
-    int minNobjects = 200;
+    int initialNobjects = 10000;                    // Maximum (and initial) number of live points evolving within the nested sampling process. 
+    int minNobjects = 1000;                         // Minimum number of live points allowed in the computation
     int maxNdrawAttempts = 10000;                   // Maximum number of attempts when trying to draw a new sampling point
     int NinitialIterationsWithoutClustering = static_cast<int>(initialNobjects*10*0.05);    // The first N iterations, we assume that there is only 1 cluster
     int NiterationsWithSameClustering = static_cast<int>(initialNobjects*10*0.005);        // Clustering is only happening every X iterations.
@@ -242,7 +243,11 @@ int main(int argc, char *argv[])
 
     MultiEllipsoidSampler nestedSampler(printOnTheScreen, ptrPriors, likelihood, myMetric, kmeans, 
                                         initialNobjects, minNobjects, initialEnlargementFraction, shrinkingRate);
-    nestedSampler.run(terminationFactor, NinitialIterationsWithoutClustering, NiterationsWithSameClustering, maxNdrawAttempts);
+
+    double toleranceOnEvidence = 0.01;
+    FerozReducer livePointsReducer(nestedSampler, toleranceOnEvidence);
+
+    nestedSampler.run(livePointsReducer, terminationFactor, NinitialIterationsWithoutClustering, NiterationsWithSameClustering, maxNdrawAttempts);
 
 
     // Save the results in output files
