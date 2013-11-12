@@ -1,7 +1,7 @@
 #include "LorentzianMixtureModel.h"
 
 
-// LorentzianMixtureModel::RegularPatternModel()
+// LorentzianMixtureModel::LorentzianMixtureModel()
 //
 // PURPOSE: 
 //      Constructor. Initializes model computation.
@@ -13,34 +13,12 @@
 //      nuMax:                  the frequency of maximum power excess
 //
 
-LorentzianMixtureModel::RegularPatternModel(const RefArrayXd covariates, const vector<int> &NparametersPerType, double nuMax)
+LorentzianMixtureModel::LorentzianMixtureModel(const RefArrayXd covariates, const vector<int> &NparametersPerType)
 : Model(covariates),
   NglobalParameters(NparametersPerType[0]),
   NprofileParameters(NparametersPerType[1]),
-  NradialOrders(NparametersPerType[2]),
-  NangularDegrees(NparametersPerType[3]),
-  NpressureModes(NparametersPerType[2]*NparametersPerType[3]),
-  NmixedModes(NparametersPerType[4]),
-  nuMax(nuMax)
+  Nmodes(NparametersPerType[2])
 {
-    relativeRadialOrders.resize(NradialOrders);
-    int startingRadialOrder = 0;
-
-    if (static_cast<int>(fmod(NradialOrders,2)) == 0)
-    {
-        startingRadialOrder = -((NradialOrders/2) - 1);
-    }
-    else 
-        if ((static_cast<int>(fmod(NradialOrders,2)) != 0) && (NradialOrders != 1))
-        {
-            startingRadialOrder = -((NradialOrders - 1)/2);
-        }
-
-    for (int radialOrder = 0; radialOrder < NradialOrders; ++radialOrder)
-    {
-        relativeRadialOrders[radialOrder] = startingRadialOrder + radialOrder;
-    }
-
 }
 
 
@@ -52,13 +30,13 @@ LorentzianMixtureModel::RegularPatternModel(const RefArrayXd covariates, const v
 
 
 
-// LorentzianMixtureModel::RegularPatternModel()
+// LorentzianMixtureModel::LorentzianMixtureModel()
 //
 // PURPOSE: 
 //      Destructor.
 //
 
-LorentzianMixtureModel::~RegularPatternModel()
+LorentzianMixtureModel::~LorentzianMixtureModel()
 {
 
 }
@@ -104,9 +82,9 @@ void LorentzianMixtureModel::predict(RefArrayXd predictions, RefArrayXd const mo
     {
         // Initialize parameters of current mode with proper access to elements of total array of free parameters
 
-        centralFrequency = modelParameters(NglobalParameters + mode);
-        naturalLogarithmOfHeight = modelParameters(NglobalParameters + Nmodes + mode);
-        linewidth = modelParameters(NglobalParameters + 2*Nmodes + mode);
+        double centralFrequency = modelParameters(NglobalParameters + mode);
+        double naturalLogarithmOfHeight = modelParameters(NglobalParameters + Nmodes + mode);
+        double linewidth = modelParameters(NglobalParameters + 2*Nmodes + mode);
 
 
         // Compute the prediction for the mode, provided the mode frequency is falling in the observed frequency range
