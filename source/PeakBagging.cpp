@@ -59,31 +59,22 @@ int main(int argc, char *argv[])
    
     // Zero step - Set up problem dimensions
 
-    vector<int> NparametersPerType(5);                              // Vector containing the configuring parameters for the RegularPattern model
-    int NglobalParameters = 2;
+    vector<int> NparametersPerType(5);                              // Vector containing the configuring parameters for the LorentzianMixture model
+    int NglobalParameters = 1;
     NparametersPerType[0] = NglobalParameters;                      // Total number of global parameters to be fitted 
                                                                     // (e.g. referenceFrequency for central radial order, flat noise level, 
                                                                     // period spacing, etc.)
-    int NprofileParameters = 2;
+    int NprofileParameters = 3;
     NparametersPerType[1] = NprofileParameters;                     // Number of parameters determining the shape 
-                                                                    // of the mode profile (height, linewidth, inclination angle, etc.)
-                                                                    // N.B the mode frequency may not be considered as a profile parameter
-    int NradialOrders = 1; 
-    NparametersPerType[2] = NradialOrders;                          // Number of radial orders expected in the PSD
-    
-    int NangularDegrees = 3;
-    NparametersPerType[3] = NangularDegrees;                        // Maximum number of angular degrees to be fitted
-                                                                    // N.B this number can differ from the product NangularDegrees*NradialOrders
-    int NmixedModes = 0;
-    NparametersPerType[4] = 0;                                      // Total number of mixed modes to be fitted
-  
-    double nuMax = 133.0 ;      // microHz
+                                                                    // of the mode profile (central frequency, height, linewidth, inclination angle, etc.)
+    int Nmodes = 1; 
+    NparametersPerType[2] = Nmodes;                                 // Total number of modes to fit
     
     
     // First step - Set up a model for the inference problem
     
-    RegularPatternModel model(covariates, NparametersPerType, nuMax);
-    double referenceDeltaNu = model.predictDeltaNuFromNuMax();
+    LorentzianMixtureModel model(covariates, NparametersPerType);
+
 
     // Second step - Setting Prior distribution
     
@@ -92,69 +83,48 @@ int main(int argc, char *argv[])
 
     // Total number of free parameters (dimensions) of the problem
 
-    int Ndimensions = NglobalParameters + 3*NradialOrders + NprofileParameters*NradialOrders*NangularDegrees;
+    int Ndimensions = NglobalParameters + NprofileParameters*Nmodes;
 
 
     // Uniform Prior
 
-    ArrayXd parametersMinima(Ndimensions);                              // Minima
+    ArrayXd parametersMinima(Ndimensions);                      // Minima
     
-    double referenceFrequencyMinimum = -referenceDeltaNu/2. - referenceDeltaNu*0.1;            // Frequency of central radial mode
-    parametersMinima(0) = referenceFrequencyMinimum;
-    
-    double noiseLevelMinimum = 5;                                      // Flat noise level
-    parametersMinima(1) = noiseLevelMinimum;
+    double noiseLevelMinimum = 5;                               // Flat noise level
+    parametersMinima(0) = noiseLevelMinimum;
 
-    ArrayXd DeltaNuMinima(NradialOrders);                               // Large frequency spacing DeltaNu
-    DeltaNuMinima.fill(10.0);
+    ArrayXd centralFrequencyMinima(Nmodes);                     // Central frequency of oscillation mode
+    centralFrequencyMinima(0) = 200.0;
     
-    ArrayXd deltaNu02Minima(NradialOrders);                             // Small frequency spacing deltaNu02
-    deltaNu02Minima.fill(0.6);
-    
-    ArrayXd deltaNu01Minima(NradialOrders);                             // Small frequency spacing deltaNu01
-    deltaNu01Minima.fill(-0.6);
-    
-    ArrayXd naturalLogarithmOfHeightsMinima(NradialOrders*NangularDegrees);              // Natural logarithm of Heights
+    ArrayXd naturalLogarithmOfHeightsMinima(Nmodes);            // Natural logarithm of mode height
     naturalLogarithmOfHeightsMinima.fill(4.6);
     
-    ArrayXd linewidthsMinima(NradialOrders*NangularDegrees);            // Linewidths
+    ArrayXd linewidthsMinima(Nmodes);                           // Mode Linewidth (FWHM)
     linewidthsMinima.fill(0.05);
     
-    parametersMinima.segment(NglobalParameters, NradialOrders) = DeltaNuMinima;
-    parametersMinima.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02Minima;
-    parametersMinima.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01Minima;
-    parametersMinima.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsMinima;
-    parametersMinima.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsMinima;
+    parametersMinima.segment(NglobalParameters, Nmodes) = centralFrequencyMinima;
+    parametersMinima.segment(NglobalParameters + Nmodes, Nmodes) = naturalLogarithmOfHeightsMinima;
+    parametersMinima.segment(NglobalParameters + 2*Nmodes, Nmodes) = linewidthsMinima;
     
-    ArrayXd parametersMaxima(Ndimensions);                              // Maxima
+
+    ArrayXd parametersMaxima(Ndimensions);                      // Maxima
     
-    double referenceFrequencyMaximum = referenceDeltaNu/2.;
-    parametersMaxima(0) = referenceFrequencyMaximum;
+    double noiseLevelMaxinum = 20;                              // Flat noise level
+    parametersMaxima(0) = noiseLevelMaximum;
+
+    ArrayXd centralFrequencyMaxima(Nmodes);                     // Central frequency of oscillation mode
+    centralFrequencyMaxima(0) = 201.0;
     
-    double noiseLevelMaximum = 20;
-    parametersMaxima(1) = noiseLevelMaximum; 
-    
-    ArrayXd DeltaNuMaxima(NradialOrders);
-    DeltaNuMaxima.fill(12.0);
-    
-    ArrayXd deltaNu02Maxima(NradialOrders);
-    deltaNu02Maxima.fill(1.8);
-    
-    ArrayXd deltaNu01Maxima(NradialOrders);
-    deltaNu01Maxima.fill(0.1);
-    
-    ArrayXd naturalLogarithmOfHeightsMaxima(NradialOrders*NangularDegrees);
+    ArrayXd naturalLogarithmOfHeightsMaxima(Nmodes);            // Natural logarithm of mode height
     naturalLogarithmOfHeightsMaxima.fill(8.01);
     
-    ArrayXd linewidthsMaxima(NradialOrders*NangularDegrees);
+    ArrayXd linewidthsMaxima(Nmodes);                           // Mode Linewidth (FWHM)
     linewidthsMaxima.fill(0.5);
     
-    parametersMaxima.segment(NglobalParameters, NradialOrders) = DeltaNuMaxima;
-    parametersMaxima.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02Maxima;
-    parametersMaxima.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01Maxima;
-    parametersMaxima.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsMaxima;
-    parametersMaxima.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsMaxima;
-    
+    parametersMaxima.segment(NglobalParameters, Nmodes) = centralFrequencyMaxima;
+    parametersMaxima.segment(NglobalParameters + Nmodes, Nmodes) = naturalLogarithmOfHeightsMaxima;
+    parametersMaxima.segment(NglobalParameters + 2*Nmodes, Nmodes) = linewidthsMaxima;
+
     UniformPrior uniformPrior(parametersMinima, parametersMaxima);
     ptrPriors[0] = &uniformPrior;
     //*/
@@ -162,97 +132,66 @@ int main(int argc, char *argv[])
 
     // Normal Prior
     /*
-    ArrayXd parametersMean(Ndimensions);
-    
-    double referenceFrequencyMean = 1.0;
-    parametersMean(0) = referenceFrequencyMean;
-    
-    double noiseLevelMean = 0.1;
-    parametersMean(1) = noiseLevelMean; 
-    
-    ArrayXd DeltaNuMean(NradialOrders);
-    DeltaNuMean.fill(2.5);
 
-    ArrayXd deltaNu02Mean(NradialOrders);
-    deltaNu02Mean.fill(0.1);
+    ArrayXd parametersMean(Ndimensions);                    // Mean
     
-    ArrayXd deltaNu01Mean(NradialOrders);
-    deltaNu01Mean.fill(0.0);
+    double noiseLevelMean = 5;                              // Flat noise level
+    parametersMean(0) = noiseLevelMean;
 
-    ArrayXd naturalLogarithmOfHeightsMean(NradialOrders*NangularDegrees);
-    naturalLogarithmOfHeightsMean.fill(5.0);        
+    ArrayXd centralFrequencyMean(Nmodes);                   // Central frequency of oscillation mode
+    centralFrequencyMean(0) = 200.0;
     
-    ArrayXd linewidthsMean(NradialOrders*NangularDegrees);
-    linewidthsMean.fill(0.15);
+    ArrayXd naturalLogarithmOfHeightsMean(Nmodes);          // Natural logarithm of mode height
+    naturalLogarithmOfHeightsMean.fill(4.6);
     
-    parametersMean.segment(NglobalParameters, NradialOrders) = DeltaNuMean;
-    parametersMean.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02Mean;
-    parametersMean.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01Mean;
-    parametersMean.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsMean;
-    parametersMean.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsMean;
+    ArrayXd linewidthsMean(Nmodes);                         // Mode Linewidth (FWHM)
+    linewidthsMean.fill(0.05);
     
-    double referenceFrequencySDV = 5.0;
-    parametersSDV(0) = referenceFrequencySDV;
+    parametersMean.segment(NglobalParameters, Nmodes) = centralFrequencyMean;
+    parametersMean.segment(NglobalParameters + Nmodes, Nmodes) = naturalLogarithmOfHeightsMean;
+    parametersMean.segment(NglobalParameters + 2*Nmodes, Nmodes) = linewidthsMean;
     
-    double noiseLevelSDV = 10;
-    parametersSDV(1) = noiseLevelSDV; 
-    
-    ArrayXd parametersSDV(Ndimensions);
 
-    ArrayXd DeltaNuSDV(NradialOrders);
-    DeltaNuSDV.fill(2.5);
+    ArrayXd parametersSDV(Ndimensions);                     // SDV
     
-    ArrayXd deltaNu02SDV(NradialOrders);
-    deltaNu02SDV.fill(0.05);
+    double noiseLevelSDV = 20;                              // Flat noise level
+    parametersSDV(0) = noiseLevelSDV;
+
+    ArrayXd centralFrequencySDV(Nmodes);                    // Central frequency of oscillation mode
+    centralFrequencySDV(0) = 201.0;
     
-    ArrayXd deltaNu01SDV(NradialOrders);
-    deltaNu01SDV.fill(0.03);
+    ArrayXd naturalLogarithmOfHeightsSDV(Nmodes);           // Natural logarithm of mode height
+    naturalLogarithmOfHeightsSDV.fill(8.01);
     
-    ArrayXd naturalLogarithmOfHeightsSDV(NradialOrders*NangularDegrees);
-    naturalLogarithmOfHeightsSDV.fill(2.0);
+    ArrayXd linewidthsSDV(Nmodes);                          // Mode Linewidth (FWHM)
+    linewidthsSDV.fill(0.5);
     
-    ArrayXd linewidthsSDV(NradialOrders*NangularDegrees);
-    linewidthsSDV.fill(0.3);
-    
-    parametersSDV.segment(NglobalParameters, NradialOrders) = DeltaNuSDV;
-    parametersSDV.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02SDV;
-    parametersSDV.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01SDV;
-    parametersSDV.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsSDV;
-    parametersSDV.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsSDV;
-    
+    parametersSDV.segment(NglobalParameters, Nmodes) = centralFrequencySDV;
+    parametersSDV.segment(NglobalParameters + Nmodes, Nmodes) = naturalLogarithmOfHeightsSDV;
+    parametersSDV.segment(NglobalParameters + 2*Nmodes, Nmodes) = linewidthsSDV;
+
     NormalPrior normalPrior(parametersMean, parametersSDV);
     ptrPriors[0] = &normalPrior;
 
     
     // Super-Gaussian Prior
-    ArrayXd parametersWOP(Ndimensions);
+    ArrayXd parametersWOP(Ndimensions);                     // WOP
     
-    double referenceFrequencyWOP = 30.0;
-    parametersWOP(0) = referenceFrequencyWOP;
-    
-    double noiseLevelWOP = 20;
-    parametersWOP(1) = noiseLevelWOP; 
-    
-    ArrayXd DeltaNuWOP(NradialOrders);
-    DeltaNuWOP.fill(2.5);
-    
-    ArrayXd deltaNu02WOP(NradialOrders);
-    deltaNu02WOP.fill(0.1);
-    
-    ArrayXd deltaNu01WOP(NradialOrders);
-    deltaNu01WOP.fill(0.1);
-    
-    ArrayXd naturalLogarithmOfHeightsWOP(NradialOrders*NangularDegrees);
-    naturalLogarithmOfHeightsWOP.fill(4.0);        
-    
-    ArrayXd linewidthsWOP(NradialOrders*NangularDegrees);
-    linewdithsWOP.fill(0.5);
+    double noiseLevelWOP = 20;                              // Flat noise level
+    parametersWOP(0) = noiseLevelWOP;
 
-    parametersWOP.segment(NglobalParameters, NradialOrders) = DeltaNuWOP;
-    parametersWOP.segment(NglobalParameters + NradialOrders, NradialOrders) = deltaNu02WOP;
-    parametersWOP.segment(NglobalParameters + 2*NradialOrders, NradialOrders) = deltaNu01WOP;
-    parametersWOP.segment(NglobalParameters + 3*NradialOrders, NradialOrders*NangularDegrees) = naturalLogarithmOfHeightsWOP;
-    parametersWOP.segment(NglobalParameters + 3*NradialOrders + NradialOrders*NangularDegrees, NradialOrders*NangularDegrees) = linewidthsWOP;
+    ArrayXd centralFrequencyWOP(Nmodes);                    // Central frequency of oscillation mode
+    centralFrequencyWOP(0) = 201.0;
+    
+    ArrayXd naturalLogarithmOfHeightsWOP(Nmodes);           // Natural logarithm of mode height
+    naturalLogarithmOfHeightsWOP.fill(8.01);
+    
+    ArrayXd linewidthsWOP(Nmodes);                          // Mode Linewidth (FWHM)
+    linewidthsWOP.fill(0.5);
+    
+    parametersWOP.segment(NglobalParameters, Nmodes) = centralFrequencyWOP;
+    parametersWOP.segment(NglobalParameters + Nmodes, Nmodes) = naturalLogarithmOfHeightsWOP;
+    parametersWOP.segment(NglobalParameters + 2*Nmodes, Nmodes) = linewidthsWOP;
     
     SuperGaussianPrior superGaussianPrior(parametersMean, parametersSDV, parametersWOP);
     ptrPriors[0] = &superGaussianPrior;
@@ -281,8 +220,8 @@ int main(int argc, char *argv[])
     int initialNobjects = 10000;                     // Number of active points evolving within the nested sampling process. 
     int minNobjects = 200;
     int maxNdrawAttempts = 10000;                   // Maximum number of attempts when trying to draw a new sampling point
-    int NinitialIterationsWithoutClustering = static_cast<int>(initialNobjects*9.5032*0.05);    // The first N iterations, we assume that there is only 1 cluster
-    int NiterationsWithSameClustering = static_cast<int>(initialNobjects*9.5032*0.005);        // Clustering is only happening every X iterations.
+    int NinitialIterationsWithoutClustering = static_cast<int>(initialNobjects*10*0.05);    // The first N iterations, we assume that there is only 1 cluster
+    int NiterationsWithSameClustering = static_cast<int>(initialNobjects*10*0.005);        // Clustering is only happening every X iterations.
     double initialEnlargementFraction = 1.50;       // Fraction by which each axis in an ellipsoid has to be enlarged.
                                                     // It can be a number >= 0, where 0 means no enlargement.
     double shrinkingRate = 0.8;                     // Exponent for remaining prior mass in ellipsoid enlargement fraction.
@@ -296,16 +235,8 @@ int main(int argc, char *argv[])
     ofstream outputFile;
     string fullPath = "peakBagging_configuringParameters.txt";
     File::openOutputFile(outputFile, fullPath);
-    outputFile << "Initial Nojects: " << initialNobjects << endl;
-    outputFile << "Minimum Nobjects: " << minNobjects << endl;
-    outputFile << "Minimum Nclusters: " << minNclusters << endl;
-    outputFile << "Maximum Nclusters: " << maxNclusters << endl;
-    outputFile << "NinitialIterationsWithoutClustering: " << NinitialIterationsWithoutClustering << endl;
-    outputFile << "NiterationsWithSameClustering: " << NiterationsWithSameClustering << endl;
-    outputFile << "maxNdrawAttempts: " << maxNdrawAttempts << endl;
-    outputFile << "Initial EnlargementFraction: " << initialEnlargementFraction << endl;
-    outputFile << "Shrinking Rate: " << shrinkingRate << endl;
-    outputFile << "terminationFactor: " << terminationFactor << endl;
+    File::configuringParametersToFile(outputFile, initialNobjects, minNobjects, minNclusters, maxNclusters, NinitialIterationsWithoutClustering,
+                                     NiterationsWithSameClustering, maxNdrawAttempts, initialEnlargementFraction, shrinkingRate, terminationFactor);
     outputFile.close();
 
 
