@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     int NprofileParameters = 3;
     NparametersPerType[1] = NprofileParameters;                     // Number of parameters determining the shape 
                                                                     // of the mode profile (central frequency, height, linewidth, inclination angle, etc.)
-    int Nmodes = 1; 
+    int Nmodes = 6; 
     NparametersPerType[2] = Nmodes;                                 // Total number of modes to fit
     
     
@@ -90,38 +90,72 @@ int main(int argc, char *argv[])
     // Uniform Prior
 
     ArrayXd parametersMinima(Ndimensions);                      // Minima
+    ArrayXd parametersMaxima(Ndimensions);                      // Maxima
     
-    double noiseLevelMinimum = 5;                               // Flat noise level
+    double noiseLevelMinimum = 7;                               // Flat noise level
+    double noiseLevelMaximum = 11.0;
     parametersMinima(0) = noiseLevelMinimum;
-
+    parametersMaxima(0) = noiseLevelMaximum;
+    
     ArrayXd centralFrequencyMinima(Nmodes);                     // Central frequency of oscillation mode
-    centralFrequencyMinima(0) = 200.0;
-    
     ArrayXd naturalLogarithmOfHeightsMinima(Nmodes);            // Natural logarithm of mode height
-    naturalLogarithmOfHeightsMinima.fill(4.6);
-    
     ArrayXd linewidthsMinima(Nmodes);                           // Mode Linewidth (FWHM)
-    linewidthsMinima.fill(0.05);
+    ArrayXd centralFrequencyMaxima(Nmodes);                     // Central frequency of oscillation mode
+    ArrayXd naturalLogarithmOfHeightsMaxima(Nmodes);            // Natural logarithm of mode height
+    ArrayXd linewidthsMaxima(Nmodes);                           // Mode Linewidth (FWHM)
+
+//  centralFrequencyMinima(0) = 142.5;
+//  centralFrequencyMaxima(0) = 144.0;
+//  naturalLogarithmOfHeightsMinima.fill(4.6);
+//  naturalLogarithmOfHeightsMaxima.fill(8.01);
+//  linewidthsMinima.fill(0.01);
+//  linewidthsMaxima.fill(0.5);
     
+    centralFrequencyMinima(0) = 119.3;
+    centralFrequencyMaxima(0) = 120.3;
+    naturalLogarithmOfHeightsMinima(0) = 3.4;
+    naturalLogarithmOfHeightsMaxima(0) = 4.9;
+    linewidthsMinima(0) = 0.01;
+    linewidthsMaxima(0) = 0.3;
+    
+    centralFrequencyMinima(1) = 120.4;
+    centralFrequencyMaxima(1) = 122.5;
+    naturalLogarithmOfHeightsMinima(1) = 5.6;
+    naturalLogarithmOfHeightsMaxima(1) = 6.9;
+    linewidthsMinima(1) = 0.2;
+    linewidthsMaxima(1) = 0.45;
+    
+    centralFrequencyMinima(2) = 126.8;
+    centralFrequencyMaxima(2) = 127.3;
+    naturalLogarithmOfHeightsMinima(2) = 3.6;
+    naturalLogarithmOfHeightsMaxima(2) = 6.0;
+    linewidthsMinima(2) = 0.02;
+    linewidthsMaxima(2) = 0.3;
+    
+    centralFrequencyMinima(3) = 130.3;
+    centralFrequencyMaxima(3) = 130.9;
+    naturalLogarithmOfHeightsMinima(3) = 3.4;
+    naturalLogarithmOfHeightsMaxima(3) = 5.2;
+    linewidthsMinima(3) = 0.05;
+    linewidthsMaxima(3) = 0.20;
+
+    centralFrequencyMinima(4) = 131.7;
+    centralFrequencyMaxima(4) = 132.8;
+    naturalLogarithmOfHeightsMinima(4) = 5.6;
+    naturalLogarithmOfHeightsMaxima(4) = 6.9;
+    linewidthsMinima(4) = 0.2;
+    linewidthsMaxima(4) = 0.45;
+
+    centralFrequencyMinima(5) = 137.0;
+    centralFrequencyMaxima(5) = 138.5;
+    naturalLogarithmOfHeightsMinima(5) = 3.6;
+    naturalLogarithmOfHeightsMaxima(5) = 6.0;
+    linewidthsMinima(5) = 0.05;
+    linewidthsMaxima(5) = 0.3;
+
     parametersMinima.segment(NglobalParameters, Nmodes) = centralFrequencyMinima;
     parametersMinima.segment(NglobalParameters + Nmodes, Nmodes) = naturalLogarithmOfHeightsMinima;
     parametersMinima.segment(NglobalParameters + 2*Nmodes, Nmodes) = linewidthsMinima;
-    
-
-    ArrayXd parametersMaxima(Ndimensions);                      // Maxima
-    
-    double noiseLevelMaximum = 20;                              // Flat noise level
-    parametersMaxima(0) = noiseLevelMaximum;
-
-    ArrayXd centralFrequencyMaxima(Nmodes);                     // Central frequency of oscillation mode
-    centralFrequencyMaxima(0) = 201.0;
-    
-    ArrayXd naturalLogarithmOfHeightsMaxima(Nmodes);            // Natural logarithm of mode height
-    naturalLogarithmOfHeightsMaxima.fill(8.01);
-    
-    ArrayXd linewidthsMaxima(Nmodes);                           // Mode Linewidth (FWHM)
-    linewidthsMaxima.fill(0.5);
-    
     parametersMaxima.segment(NglobalParameters, Nmodes) = centralFrequencyMaxima;
     parametersMaxima.segment(NglobalParameters + Nmodes, Nmodes) = naturalLogarithmOfHeightsMaxima;
     parametersMaxima.segment(NglobalParameters + 2*Nmodes, Nmodes) = linewidthsMaxima;
@@ -218,12 +252,12 @@ int main(int argc, char *argv[])
     // Start nested sampling process
     
     bool printOnTheScreen = true;                   // Print results on the screen
-    int initialNobjects = 10000;                    // Maximum (and initial) number of live points evolving within the nested sampling process. 
-    int minNobjects = 1000;                         // Minimum number of live points allowed in the computation
+    int initialNobjects = 3000;                     // Maximum (and initial) number of live points evolving within the nested sampling process. 
+    int minNobjects = 3000;                          // Minimum number of live points allowed in the computation
     int maxNdrawAttempts = 10000;                   // Maximum number of attempts when trying to draw a new sampling point
-    int NinitialIterationsWithoutClustering = static_cast<int>(initialNobjects*10*0.05);    // The first N iterations, we assume that there is only 1 cluster
-    int NiterationsWithSameClustering = static_cast<int>(initialNobjects*10*0.005);        // Clustering is only happening every X iterations.
-    double initialEnlargementFraction = 1.50;       // Fraction by which each axis in an ellipsoid has to be enlarged.
+    int NinitialIterationsWithoutClustering = static_cast<int>(initialNobjects*0.5);    // The first N iterations, we assume that there is only 1 cluster
+    int NiterationsWithSameClustering = static_cast<int>(initialNobjects*0.05);        // Clustering is only happening every N iterations.
+    double initialEnlargementFraction = 1.20;       // Fraction by which each axis in an ellipsoid has to be enlarged.
                                                     // It can be a number >= 0, where 0 means no enlargement.
     double shrinkingRate = 0.8;                     // Exponent for remaining prior mass in ellipsoid enlargement fraction.
                                                     // It is a number between 0 and 1. The smaller the slower the shrinkage
@@ -234,7 +268,8 @@ int main(int argc, char *argv[])
     // Save configuring parameters into an ASCII file
 
     ofstream outputFile;
-    string fullPath = "peakBagging_configuringParameters.txt";
+    string outputDirName(argv[2]);
+    string fullPath = outputDirName + "peakBagging_configuringParameters.txt";
     File::openOutputFile(outputFile, fullPath);
     File::configuringParametersToFile(outputFile, initialNobjects, minNobjects, minNclusters, maxNclusters, NinitialIterationsWithoutClustering,
                                      NiterationsWithSameClustering, maxNdrawAttempts, initialEnlargementFraction, shrinkingRate, terminationFactor);
@@ -253,7 +288,6 @@ int main(int argc, char *argv[])
     // Save the results in output files
     
     Results results(nestedSampler);
-    string outputDirName(argv[2]);
     results.writeParametersToFile(outputDirName + "parameter");
     results.writeLogLikelihoodToFile(outputDirName + "likelihoodDistribution.txt");
     results.writeEvidenceInformationToFile(outputDirName + "evidenceInformation.txt");
