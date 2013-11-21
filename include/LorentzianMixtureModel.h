@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include "Model.h"
+#include "BackgroundModel.h"
 
 using namespace std;
 using Eigen::ArrayXd;
@@ -20,7 +21,7 @@ class LorentzianMixtureModel : public Model
 {
     public:
     
-        LorentzianMixtureModel(const RefArrayXd covariates, const vector<int> &NparametersPerType);
+        LorentzianMixtureModel(const RefArrayXd covariates, const vector<int> &NparametersPerType, BackgroundModel &backgroundModel);
         ~LorentzianMixtureModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
@@ -32,12 +33,11 @@ class LorentzianMixtureModel : public Model
 
     private:
 
-        int NglobalParameters;                          // Total number of global parameters to be fitted 
-                                                        // (e.g. nuMax, white noise, period spacing, etc.)
         int NprofileParameters;                         // Number of parameters determining the shape 
                                                         // of the mode profile (central frequency, height, linewidth, inclination angle, etc.)
         int Nmodes;                                     // Total number of modes to be fitted
-
+        BackgroundModel &backgroundModel;               // The default background model to adopt for predicting the background level
+        ArrayXd backgroundPrediction;                   // An array containing the prediction for the background in all the range of the covariates
 
 }; 
 
