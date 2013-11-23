@@ -17,8 +17,7 @@
 LorentzianMixtureModel::LorentzianMixtureModel(const RefArrayXd covariates, const vector<int> &NparametersPerType, BackgroundModel &backgroundModel)
 : Model(covariates),
   NprofileParameters(NparametersPerType[0]),
-  Nmodes(NparametersPerType[1]),
-  backgroundModel(backgroundModel)
+  Nmodes(NparametersPerType[1])
 {
     backgroundPrediction.resize(covariates.size());
     backgroundModel.predict(backgroundPrediction);
