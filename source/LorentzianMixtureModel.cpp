@@ -84,7 +84,7 @@ void LorentzianMixtureModel::predict(RefArrayXd predictions, RefArrayXd const mo
         // Initialize parameters of current mode with proper access to elements of total array of free parameters
 
         double centralFrequency = modelParameters(mode);
-        double naturalLogarithmOfHeight = modelParameters(Nmodes + mode);
+        double height = modelParameters(Nmodes + mode);
         double linewidth = modelParameters(2*Nmodes + mode);
 
 
@@ -92,8 +92,7 @@ void LorentzianMixtureModel::predict(RefArrayXd predictions, RefArrayXd const mo
 
         if ((centralFrequency > covariates.minCoeff()) && (centralFrequency < covariates.maxCoeff()))
         {
-            Functions::modeProfile(singleModePrediction, covariates, centralFrequency, 
-                                   exp(naturalLogarithmOfHeight), linewidth);
+            Functions::modeProfile(singleModePrediction, covariates, centralFrequency, height, linewidth);
             predictions += singleModePrediction;
         }
         else
