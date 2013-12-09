@@ -4,6 +4,7 @@ build/
 test/
 source/.*swo
 source/.*swp
+source/HnH/
 include/.*swo
 include/.*swp
 results/
