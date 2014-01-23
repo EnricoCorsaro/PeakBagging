@@ -35,6 +35,7 @@ class BackgroundModel : public Model
     protected:
 
         ArrayXd configuringParameters;
+        ArrayXd responseFunction;
 
 
     private:
