@@ -1,7 +1,7 @@
-#include "OneHarveyMSBackgroundModel.h"
+#include "PuntoBackgroundModel.h"
 
 
-// OneHarveyMSBackgroundModel::OneHarveyMSBackgroundModel()
+// PuntoBackgroundModel::PuntoBackgroundModel()
 //
 // PURPOSE: 
 //      Constructor. Initializes model computation.
@@ -11,7 +11,7 @@
 //                              of the independent variable.
 //
 
-OneHarveyMSBackgroundModel::OneHarveyMSBackgroundModel(const RefArrayXd covariates)
+PuntoBackgroundModel::PuntoBackgroundModel(const RefArrayXd covariates)
 : BackgroundModel(covariates)
 {
     // Create response function modulating the sampling rate of input Kepler SC data
@@ -30,13 +30,13 @@ OneHarveyMSBackgroundModel::OneHarveyMSBackgroundModel(const RefArrayXd covariat
 
 
 
-// OneHarveyMSBackgroundModel::OneHarveyMSBackgroundModel()
+// PuntoBackgroundModel::PuntoBackgroundModel()
 //
 // PURPOSE: 
 //      Destructor.
 //
 
-OneHarveyMSBackgroundModel::~OneHarveyMSBackgroundModel()
+PuntoBackgroundModel::~PuntoBackgroundModel()
 {
 
 }
@@ -50,7 +50,7 @@ OneHarveyMSBackgroundModel::~OneHarveyMSBackgroundModel()
 
 
 
-// OneHarveyMSBackgroundModel::predict()
+// PuntoBackgroundModel::predict()
 //
 // PURPOSE:
 //      Builds the predictions from a Background model based on a configuration
@@ -67,7 +67,7 @@ OneHarveyMSBackgroundModel::~OneHarveyMSBackgroundModel()
 //      void
 //
 
-void OneHarveyMSBackgroundModel::predict(RefArrayXd predictions)
+void PuntoBackgroundModel::predict(RefArrayXd predictions)
 {
     Nparameters = configuringParameters.size();
 
@@ -98,7 +98,7 @@ void OneHarveyMSBackgroundModel::predict(RefArrayXd predictions)
 
     // Compute Gaussian envelope for MS Oscillations and add it to the predictions
 
-    predictions += heightOscillation * exp(-1.0*(nuMax - covariates)*(nuMax - covariates)/(2.0 * sigma * sigma));
+    // predictions += heightOscillation * exp(-1.0*(nuMax - covariates)*(nuMax - covariates)/(2.0 * sigma * sigma));
 
 
     // Modulate the model by the response function (apodization)
