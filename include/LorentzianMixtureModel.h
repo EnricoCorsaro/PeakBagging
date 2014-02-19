@@ -30,13 +30,14 @@ class LorentzianMixtureModel : public Model
     protected:
 
 
-
     private:
 
         int NprofileParameters;                         // Number of parameters determining the shape 
                                                         // of the mode profile (central frequency, height, linewidth, inclination angle, etc.)
         int Nmodes;                                     // Total number of modes to be fitted
         ArrayXd backgroundPrediction;                   // An array containing the prediction for the background in all the range of the covariates
+        ArrayXd responseFunction;                       // An array containing the apodization response function for the signal of the input data
+        ArrayXd backgroundParameters;                   // An array containing the configuring parameters for the background model adopted
 
 }; 
 

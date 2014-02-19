@@ -21,6 +21,8 @@ LorentzianMixtureModel::LorentzianMixtureModel(const RefArrayXd covariates, cons
 {
     backgroundPrediction.resize(covariates.size());
     backgroundModel.predict(backgroundPrediction);
+    responseFunction = backgroundModel.getResponseFunction();
+    backgroundParameters = backgroundModel.getConfiguringParameters();
 }
 
 
@@ -70,41 +72,35 @@ LorentzianMixtureModel::~LorentzianMixtureModel()
 // NOTE:
 //      The free parameters are to be given in the order
 //      (i) Mode central frequency (times the number of modes)
-//      (ii) Mode profile ln(height) (times the number of modes)
+//      (ii) Mode profile amplitude (times the number of modes)
 //      (iii) Mode profile linewidth (times the number of modes)
 
 void LorentzianMixtureModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
 {
     Nparameters = modelParameters.size();
-    assert(Nparameters == (NprofileParameters*Nmodes));
     ArrayXd singleModePrediction = ArrayXd::Zero(covariates.size());
 
     for (int mode = 0; mode < Nmodes; ++mode)
     {
         // Initialize parameters of current mode with proper access to elements of total array of free parameters
 
-        double centralFrequency = modelParameters(mode);
-        double height = modelParameters(Nmodes + mode);
-        double linewidth = modelParameters(2*Nmodes + mode);
+        double centralFrequency = modelParameters(NprofileParameters*mode);
+        double amplitude = modelParameters(NprofileParameters*mode + 1);
+        double linewidth = modelParameters(NprofileParameters*mode + 2);
 
-
-        // Compute the prediction for the mode, provided the mode frequency is falling in the observed frequency range
-
-        if ((centralFrequency > covariates.minCoeff()) && (centralFrequency < covariates.maxCoeff()))
-        {
-            Functions::modeProfile(singleModePrediction, covariates, centralFrequency, height, linewidth);
-            predictions += singleModePrediction;
-        }
-        else
-        {
-            continue;
-        }
+        Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency, amplitude, linewidth);
+        predictions += singleModePrediction;
     }
 
 
-    // Add noise background
+    // Adjust by apodization of the signal
+    
+    predictions *= responseFunction;
 
-    predictions += backgroundPrediction;           
+
+    // Add background component
+
+    predictions += backgroundPrediction;
 }
 
 
