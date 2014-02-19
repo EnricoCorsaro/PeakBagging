@@ -55,9 +55,8 @@ PuntoBackgroundModel::~PuntoBackgroundModel()
 // PURPOSE:
 //      Builds the predictions from a Background model based on a configuration
 //      file that contains all the free parameters of the given model.
-//      This is an overloaded function, and its implementation is only given
-//      by the concrete derived class that implements the desired model for
-//      modeling the background.
+//      The model for Punto (KIC 9139163) consists in an exponential term
+//      and a granulation component, overlaid to a flat noise level.
 //
 // INPUT:
 //      predictions:        one-dimensional array to contain the predictions
@@ -75,14 +74,11 @@ void PuntoBackgroundModel::predict(RefArrayXd predictions)
     // Initialize global parameters
 
     double flatNoiseLevel = configuringParameters(0);
-    double heightPowerLaw = configuringParameters(1);
+    double heightPowerLaw = exp(configuringParameters(1));
     double exponentPowerLaw = configuringParameters(2);
     double amplitudeHarvey1 = configuringParameters(3);
     double timescaleHarvey1 = configuringParameters(4);
     double exponentHarvey1 = configuringParameters(5);
-    double heightOscillation = configuringParameters(6);
-    double nuMax = configuringParameters(7);
-    double sigma = configuringParameters(8);
 
 
     // Compute decaying power law component
@@ -94,11 +90,6 @@ void PuntoBackgroundModel::predict(RefArrayXd predictions)
 
     predictions += 4*amplitudeHarvey1*amplitudeHarvey1 * (timescaleHarvey1 / 1.e6) / 
                    (1.0 + (2*Functions::PI*covariates*timescaleHarvey1/1.e6).pow(exponentHarvey1));
-
-
-    // Compute Gaussian envelope for MS Oscillations and add it to the predictions
-
-    // predictions += heightOscillation * exp(-1.0*(nuMax - covariates)*(nuMax - covariates)/(2.0 * sigma * sigma));
 
 
     // Modulate the model by the response function (apodization)
