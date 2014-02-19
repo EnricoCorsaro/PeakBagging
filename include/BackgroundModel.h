@@ -27,15 +27,17 @@ class BackgroundModel : public Model
 
         void readConfiguringParametersFromFile(const string inputFileName);
         ArrayXd getConfiguringParameters();
+        ArrayXd getResponseFunction();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters) = 0;
         virtual void predict(RefArrayXd predictions) = 0;
+    
 
 
     protected:
 
         ArrayXd configuringParameters;
-        ArrayXd responseFunction;
+        ArrayXd responseFunction;               // An array containing the apodization response function for the signal of the input data
 
 
     private:

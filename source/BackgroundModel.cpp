@@ -102,3 +102,29 @@ ArrayXd BackgroundModel::getConfiguringParameters()
 {
     return configuringParameters;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+// BackgroundModel::getResponseFunction()
+//
+// PURPOSE:
+//      Gets the protected data member responseFunction.
+//
+// OUTPUT:
+//      An eigen array containing the apodization response function for the signal of the input data
+//
+
+ArrayXd BackgroundModel::getResponseFunction()
+{
+    return responseFunction;
+}
