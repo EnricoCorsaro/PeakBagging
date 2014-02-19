@@ -18,22 +18,14 @@
 #include "NormalPrior.h"
 #include "ExponentialLikelihood.h"
 #include "LorentzianMixtureModel.h"
-#include "CanBackgroundModel.h"
+#include "PuntoBackgroundModel.h"
+#include "PowerlawReducer.h"
 #include "FerozReducer.h"
 #include "Results.h"
 #include "Ellipsoid.h"
 
 int main(int argc, char *argv[])
 {
-    // ---------------------------
-    // ----- Read input data -----
-    // ---------------------------
-
-    unsigned long Nrows;
-    int Ncols;
-    ArrayXXd data;
-  
-
     // Check number of arguments for main function
     
     if (argc != 3)
@@ -42,16 +34,20 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    
+    // ---------------------------
+    // ----- Read input data -----
+    // ---------------------------
 
-    // Read data from input file specified
+    unsigned long Nrows;
+    int Ncols;
+    ArrayXXd data;
+    string inputFileName(argv[1]);
+    string outputDirName(argv[2]);
+    string outputPathPrefix = outputDirName;
 
-    ifstream inputFile(argv[1]);
-    if (!inputFile.good())
-    {
-        cerr << "Error opening input file" << endl;
-        exit(EXIT_FAILURE);
-    }
-
+    ifstream inputFile;
+    File::openInputFile(inputFile, inputFileName);
     File::sniffFile(inputFile, Nrows, Ncols);
     data = File::arrayXXdFromFile(inputFile, Nrows, Ncols);
     inputFile.close();
@@ -61,8 +57,26 @@ int main(int argc, char *argv[])
     
     ArrayXd covariates = data.col(0);
     ArrayXd observations = data.col(1);
-   
-   
+
+    
+    // Trim input dataset if desired
+
+    double lowerFrequency = 1635.0;        // muHz
+    double upperFrequency = 1725.0;        // muHz
+    vector<int> trimIndices = Functions::findArrayIndicesWithinBoundaries(covariates, lowerFrequency, upperFrequency);
+    int Nbins = trimIndices.size();
+    ArrayXd trimmedArray(Nbins);
+    trimmedArray = covariates.segment(trimIndices[0],Nbins);
+    covariates.resize(Nbins);
+    covariates = trimmedArray;
+    trimmedArray = observations.segment(trimIndices[0],Nbins);
+    observations.resize(Nbins);
+    observations = trimmedArray;
+
+    cerr << " Frequency range: [" << covariates.minCoeff() << ", " << covariates.maxCoeff() << "] muHz" << endl;
+    cerr << endl;
+
+
     // --------------------------------------------------
     // ----- Zeroth step. Set up problem dimensions -----
     // --------------------------------------------------
@@ -71,12 +85,10 @@ int main(int argc, char *argv[])
     int NprofileParameters = 3;
     NparametersPerType[0] = NprofileParameters;                     // Number of parameters determining the shape 
                                                                     // of the mode profile (central frequency, height, linewidth, inclination angle, etc.)
-    int Nmodes = 2; 
+    int Nmodes = 3; 
     NparametersPerType[1] = Nmodes;                                 // Total number of modes to fit
     int Ndimensions = NprofileParameters*Nmodes;
-    cout << "--------------------------------------" << endl;
-    cout << "Inference problem has " << Ndimensions << " dimensions." << endl;
-    cout << "--------------------------------------" << endl;
+
     
     
     // -------------------------------------------------------------------
@@ -85,9 +97,9 @@ int main(int argc, char *argv[])
     
     // Chose a model for background and configure it, then do the same for the peakbagging model.
     
-    CanBackgroundModel backgroundModel(covariates);
-    string outputDirName(argv[2]);
-    string backgroundConfiguringParameters = outputDirName + "CanModel_configuringParameters.txt";
+    PuntoBackgroundModel backgroundModel(covariates);             // CAN model by Kallinger et al. 2010
+
+    string backgroundConfiguringParameters = outputDirName + "Punto_configuringParameters.txt";
     backgroundModel.readConfiguringParametersFromFile(backgroundConfiguringParameters);
     LorentzianMixtureModel model(covariates, NparametersPerType, backgroundModel);
 
@@ -98,7 +110,8 @@ int main(int argc, char *argv[])
     
     // Total number of prior types
 
-    vector<Prior*> ptrPriors(1);
+    int NpriorTypes = 1;
+    vector<Prior*> ptrPriors(NpriorTypes);
 
 
     // Uniform Prior
@@ -107,75 +120,47 @@ int main(int argc, char *argv[])
     ArrayXd parametersMaxima(Ndimensions);                      // Maxima
     
     ArrayXd centralFrequencyMinima(Nmodes);                     // Central frequency of oscillation mode
-    ArrayXd naturalLogarithmOfHeightsMinima(Nmodes);            // Natural logarithm of mode height
+    ArrayXd centralFrequencyMaxima(Nmodes);                     
+    ArrayXd amplitudeMinima(Nmodes);                         // Natural logarithm of mode height
+    ArrayXd amplitudeMaxima(Nmodes);            
     ArrayXd linewidthsMinima(Nmodes);                           // Mode Linewidth (FWHM)
-    ArrayXd centralFrequencyMaxima(Nmodes);                     // Central frequency of oscillation mode
-    ArrayXd naturalLogarithmOfHeightsMaxima(Nmodes);            // Natural logarithm of mode height
-    ArrayXd linewidthsMaxima(Nmodes);                           // Mode Linewidth (FWHM)
+    ArrayXd linewidthsMaxima(Nmodes);                           
 
+
+    // l = 1
+    centralFrequencyMinima(0) = 1650.0;
+    centralFrequencyMaxima(0) = 1670.0;
+    amplitudeMinima(0) = 5.5;
+    amplitudeMaxima(0) = 8.0;
+    linewidthsMinima(0) = 4.0;
+    linewidthsMaxima(0) = 10.0;
     
-    centralFrequencyMinima(0) = 119.5;
-    centralFrequencyMaxima(0) = 120.0;
-    naturalLogarithmOfHeightsMinima(0) = 5.5;
-    naturalLogarithmOfHeightsMaxima(0) = 6.2;
-    linewidthsMinima(0) = 0.2;
-    linewidthsMaxima(0) = 0.4;
+    centralFrequencyMinima(1) = 1693.0;
+    centralFrequencyMaxima(1) = 1700.0;
+    amplitudeMinima(1) = 3.0;
+    amplitudeMaxima(1) = 8.0;
+    linewidthsMinima(1) = 4.0;
+    linewidthsMaxima(1) = 8.0;
     
+    centralFrequencyMinima(2) = 1700.1;
+    centralFrequencyMaxima(2) = 1710.0;
+    amplitudeMinima(2) = 5.5;
+    amplitudeMaxima(2) = 8.0;
+    linewidthsMinima(2) = 4.0;
+    linewidthsMaxima(2) = 10.0;
 
-    centralFrequencyMinima(1) = 120.4;
-    centralFrequencyMaxima(1) = 122.5;
-    naturalLogarithmOfHeightsMinima(1) = 5.8;
-    naturalLogarithmOfHeightsMaxima(1) = 6.9;
-    linewidthsMinima(1) = 0.28;
-    linewidthsMaxima(1) = 0.46;
-/*    
-    centralFrequencyMinima(2) = 126.8;
-    centralFrequencyMaxima(2) = 127.3;
-    naturalLogarithmOfHeightsMinima(2) = 3.6;
-    naturalLogarithmOfHeightsMaxima(2) = 6.0;
-    linewidthsMinima(2) = 0.02;
-    linewidthsMaxima(2) = 0.3;
+    for (int i=0; i < Nmodes; ++i)
+    {
+        parametersMinima.segment(Nmodes*i, NprofileParameters) << centralFrequencyMinima(i), amplitudeMinima(i), linewidthsMinima(i); 
+        parametersMaxima.segment(Nmodes*i, NprofileParameters) << centralFrequencyMaxima(i), amplitudeMaxima(i), linewidthsMaxima(i); 
+    }
     
-    centralFrequencyMinima(3) = 130.3;
-    centralFrequencyMaxima(3) = 130.9;
-    naturalLogarithmOfHeightsMinima(3) = 3.4;
-    naturalLogarithmOfHeightsMaxima(3) = 5.2;
-    linewidthsMinima(3) = 0.05;
-    linewidthsMaxima(3) = 0.20;
-
-    centralFrequencyMinima(4) = 131.7;
-    centralFrequencyMaxima(4) = 132.8;
-    naturalLogarithmOfHeightsMinima(4) = 5.6;
-    naturalLogarithmOfHeightsMaxima(4) = 6.9;
-    linewidthsMinima(4) = 0.2;
-    linewidthsMaxima(4) = 0.45;
-
-    centralFrequencyMinima(5) = 137.0;
-    centralFrequencyMaxima(5) = 138.5;
-    naturalLogarithmOfHeightsMinima(5) = 3.6;
-    naturalLogarithmOfHeightsMaxima(5) = 6.0;
-    linewidthsMinima(5) = 0.05;
-    linewidthsMaxima(5) = 0.3;
-
-    centralFrequencyMinima(0) = 142.5;
-    centralFrequencyMaxima(0) = 144.0;
-    naturalLogarithmOfHeightsMinima.fill(4.6);
-    naturalLogarithmOfHeightsMaxima.fill(8.01);
-    linewidthsMinima.fill(0.01);
-    linewidthsMaxima.fill(0.5);
-
-*/
-
-    parametersMinima.segment(0, Nmodes) = centralFrequencyMinima;
-    parametersMinima.segment(Nmodes, Nmodes) = naturalLogarithmOfHeightsMinima;
-    parametersMinima.segment(2*Nmodes, Nmodes) = linewidthsMinima;
-    parametersMaxima.segment(0, Nmodes) = centralFrequencyMaxima;
-    parametersMaxima.segment(Nmodes, Nmodes) = naturalLogarithmOfHeightsMaxima;
-    parametersMaxima.segment(2*Nmodes, Nmodes) = linewidthsMaxima;
-
     UniformPrior uniformPrior(parametersMinima, parametersMaxima);
     ptrPriors[0] = &uniformPrior;
     
+    string fullPathHyperParameters = outputPathPrefix + "hyperParametersUniform.txt";
+    uniformPrior.writeHyperParametersToFile(fullPathHyperParameters);
+
 
     // -----------------------------------------------------------------
     // ----- Third step. Set up the likelihood function to be used -----
@@ -188,12 +173,12 @@ int main(int argc, char *argv[])
     // ----- Fourth step. Set up the K-means clusterer using an Euclidean metric -----
     // -------------------------------------------------------------------------------
 
-    EuclideanMetric myMetric;
     int minNclusters = 1;
     int maxNclusters = 6;
     int Ntrials = 10;
     double relTolerance = 0.01;
 
+    EuclideanMetric myMetric;
     KmeansClusterer kmeans(myMetric, minNclusters, maxNclusters, Ntrials, relTolerance); 
 
 
@@ -202,49 +187,55 @@ int main(int argc, char *argv[])
     // ---------------------------------------------------------------------
     
     bool printOnTheScreen = true;                   // Print results on the screen
-    int initialNobjects = 1000;                     // Maximum (and initial) number of live points evolving within the nested sampling process. 
+    int initialNobjects = 1000;                      // Maximum (and initial) number of live points evolving within the nested sampling process. 
     int minNobjects = 1000;                          // Minimum number of live points allowed in the computation
     int maxNdrawAttempts = 10000;                   // Maximum number of attempts when trying to draw a new sampling point
-    int NinitialIterationsWithoutClustering = static_cast<int>(initialNobjects*0.5);    // The first N iterations, we assume that there is only 1 cluster
-    int NiterationsWithSameClustering = static_cast<int>(initialNobjects*0.05);        // Clustering is only happening every N iterations.
-    double initialEnlargementFraction = 1.20;       // Fraction by which each axis in an ellipsoid has to be enlarged.
+    int NinitialIterationsWithoutClustering = 1000;    // The first N iterations, we assume that there is only 1 cluster
+    int NiterationsWithSameClustering = 50;        // Clustering is only happening every N iterations.
+    double initialEnlargementFraction = 2.00;       // Fraction by which each axis in an ellipsoid has to be enlarged.
                                                     // It can be a number >= 0, where 0 means no enlargement.
-    double shrinkingRate = 0.8;                     // Exponent for remaining prior mass in ellipsoid enlargement fraction.
+    double shrinkingRate = 0.02;                     // Exponent for remaining prior mass in ellipsoid enlargement fraction.
                                                     // It is a number between 0 and 1. The smaller the slower the shrinkage
                                                     // of the ellipsoids.
-    double terminationFactor = 0.05;                // Termination factor for nested sampling process.
+    double terminationFactor = 0.01;                // Termination factor for nested sampling process.
 
     
-    // Save configuring parameters into an ASCII file
-
-    ofstream outputFile; 
-    string fullPath = outputDirName + "peakBagging_configuringParameters.txt";
-    File::openOutputFile(outputFile, fullPath);
-    File::configuringParametersToFile(outputFile, initialNobjects, minNobjects, minNclusters, maxNclusters, NinitialIterationsWithoutClustering,
-                                     NiterationsWithSameClustering, maxNdrawAttempts, initialEnlargementFraction, shrinkingRate, terminationFactor);
-    outputFile.close();
-
     MultiEllipsoidSampler nestedSampler(printOnTheScreen, ptrPriors, likelihood, myMetric, kmeans, 
                                         initialNobjects, minNobjects, initialEnlargementFraction, shrinkingRate);
+    
+    double tolerance = 1.e2;
+    double exponent = 0.4;
+    PowerlawReducer livePointsReducer(nestedSampler, tolerance, exponent, terminationFactor);
 
+    nestedSampler.run(livePointsReducer, NinitialIterationsWithoutClustering, NiterationsWithSameClustering, 
+                      maxNdrawAttempts, terminationFactor, outputPathPrefix);
 
-    // Choose which reducer of the live points to adopt and include it in the run.
-
-    double toleranceOnEvidence = 0.01;
-    FerozReducer livePointsReducer(nestedSampler, toleranceOnEvidence);
-    nestedSampler.run(livePointsReducer, terminationFactor, NinitialIterationsWithoutClustering, NiterationsWithSameClustering, maxNdrawAttempts);
+    nestedSampler.outputFile << "# List of configuring parameters used for the ellipsoidal sampler and X-means" << endl;
+    nestedSampler.outputFile << "# Row #1: Minimum Nclusters" << endl;
+    nestedSampler.outputFile << "# Row #2: Maximum Nclusters" << endl;
+    nestedSampler.outputFile << "# Row #3: Initial Enlargement Fraction" << endl;
+    nestedSampler.outputFile << "# Row #4: Shrinking Rate" << endl;
+    nestedSampler.outputFile << minNclusters << endl;
+    nestedSampler.outputFile << maxNclusters << endl;
+    nestedSampler.outputFile << initialEnlargementFraction << endl;
+    nestedSampler.outputFile << shrinkingRate << endl;
+    nestedSampler.outputFile.close();
 
 
     // -------------------------------------------------------
     // ----- Last step. Save the results in output files -----
     // -------------------------------------------------------
-    
+   
     Results results(nestedSampler);
-    results.writeParametersToFile(outputDirName + "parameter");
-    results.writeLogLikelihoodToFile(outputDirName + "likelihoodDistribution.txt");
-    results.writeEvidenceInformationToFile(outputDirName + "evidenceInformation.txt");
-    results.writePosteriorProbabilityToFile(outputDirName + "posteriorDistribution.txt");
-    results.writeParametersSummaryToFile(outputDirName + "parameterSummary.txt");
+    results.writeParametersToFile("parameter");
+    results.writeLogLikelihoodToFile("logLikelihood.txt");
+    results.writeEvidenceInformationToFile("evidenceInformation.txt");
+    results.writePosteriorProbabilityToFile("posteriorDistribution.txt");
+    results.writeLogWeightsToFile("logWeights.txt");
+
+    double credibleLevel = 68.3;
+    bool writeMarginalDistributionToFile = true;
+    results.writeParametersSummaryToFile("parameterSummary.txt", credibleLevel, writeMarginalDistributionToFile);
 
     
     // END
