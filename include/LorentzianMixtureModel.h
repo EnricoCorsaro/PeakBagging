@@ -9,7 +9,6 @@
 #define LORENTZIANMIXTUREMODEL_H
 
 #include <iostream>
-#include "Model.h"
 #include "BackgroundModel.h"
 
 using namespace std;

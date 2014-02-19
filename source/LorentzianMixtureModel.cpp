@@ -11,7 +11,7 @@
 //                              of the independent variable.
 //      NparametersPerType:     configuring numbers for the Peak Bagging model.
 //      backgroundModel:        an object of class BackgroundModel containing a
-//                              model for the background of RG stars.
+//                              model for the background of the star.
 //
 
 LorentzianMixtureModel::LorentzianMixtureModel(const RefArrayXd covariates, const vector<int> &NparametersPerType, BackgroundModel &backgroundModel)
