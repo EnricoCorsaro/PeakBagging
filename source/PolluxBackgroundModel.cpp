@@ -1,7 +1,7 @@
-#include "CanBackgroundModel.h"
+#include "PolluxBackgroundModel.h"
 
 
-// CanBackgroundModel::CanBackgroundModel()
+// PolluxBackgroundModel::PolluxBackgroundModel()
 //
 // PURPOSE: 
 //      Constructor. Initializes model computation.
@@ -11,7 +11,7 @@
 //                              of the independent variable.
 //
 
-CanBackgroundModel::CanBackgroundModel(const RefArrayXd covariates)
+PolluxBackgroundModel::PolluxBackgroundModel(const RefArrayXd covariates)
 : BackgroundModel(covariates)
 {
     // Create response function modulating the sampling rate of input Kepler LC data
@@ -30,13 +30,13 @@ CanBackgroundModel::CanBackgroundModel(const RefArrayXd covariates)
 
 
 
-// CanBackgroundModel::CanBackgroundModel()
+// PolluxBackgroundModel::PolluxBackgroundModel()
 //
 // PURPOSE: 
 //      Destructor.
 //
 
-CanBackgroundModel::~CanBackgroundModel()
+PolluxBackgroundModel::~PolluxBackgroundModel()
 {
 
 }
@@ -50,7 +50,7 @@ CanBackgroundModel::~CanBackgroundModel()
 
 
 
-// CanBackgroundModel::predict()
+// PolluxBackgroundModel::predict()
 //
 // PURPOSE:
 //      Builds the predictions from a Background model based on a configuration
@@ -67,7 +67,7 @@ CanBackgroundModel::~CanBackgroundModel()
 //      void
 //
 
-void CanBackgroundModel::predict(RefArrayXd predictions)
+void PolluxBackgroundModel::predict(RefArrayXd predictions)
 {
     Nparameters = configuringParameters.size();
 
@@ -92,11 +92,6 @@ void CanBackgroundModel::predict(RefArrayXd predictions)
     predictions += 2*Functions::PI*amplitudeHarvey2*amplitudeHarvey2/(frequencyHarvey2*(1.0 + (covariates/frequencyHarvey2).pow(4)));
     predictions += 2*Functions::PI*amplitudeHarvey3*amplitudeHarvey3/(frequencyHarvey3*(1.0 + (covariates/frequencyHarvey3).pow(4)));
 
-
-    // Compute Gaussian envelope for RGB Oscillations and add it to the predictions
-
-    predictions += heightOscillation * exp(-1.0*(nuMax - covariates)*(nuMax - covariates)/(2.0 * sigma * sigma));
-    
     
     // Modulate the model by the response function (apodization)
     
