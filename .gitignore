@@ -9,6 +9,7 @@ source/RG/*
 include/.*swo
 include/.*swp
 results/
+data/Simulations/*
 
 # Compiled source 
 
