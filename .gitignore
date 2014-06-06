@@ -4,8 +4,8 @@ build/
 test/
 source/.*swo
 source/.*swp
-source/MS/*
-source/RG/*
+source/Other/*
+include/Other/*
 include/.*swo
 include/.*swp
 results/
