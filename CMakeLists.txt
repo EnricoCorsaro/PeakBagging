@@ -26,19 +26,19 @@ cmake_minimum_required(VERSION 2.8)
 
 set(PeakBagging_Dir ${CMAKE_SOURCE_DIR})
 
-# Specify the location of the MultiNest directory
+# Specify the location of the Diamonds directory
 
 get_filename_component(Parent_Dir ${PeakBagging_Dir}/ PATH)
-set(MultiNest_Dir ${Parent_Dir}/MultiNest)
+set(Diamonds_Dir ${Parent_Dir}/Diamonds)
 
 # Specify the location of the header files
 
 include_directories(${PeakBagging_Dir}/include)
-include_directories(${MultiNest_Dir}/include)
+include_directories(${Diamonds_Dir}/include)
 
 # Specify the location of the multinest library
 
-LINK_DIRECTORIES(${MultiNest_Dir}/build)
+LINK_DIRECTORIES(${Diamonds_Dir}/build)
 
 # Specify the source files to be compiled
               
@@ -64,7 +64,7 @@ endif()
 
 add_executable(peakbagging ${sourceFiles})
 
-# Link the executable with the MultiNest library
+# Link the executable with the Diamonds library
 
-target_link_libraries(peakbagging multinest) 
+target_link_libraries(peakbagging diamonds) 
 
