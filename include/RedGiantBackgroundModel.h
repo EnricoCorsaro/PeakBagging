@@ -1,12 +1,12 @@
 // Derived concrete class for global background fit to RG stars.
 // Created by Enrico Corsaro @ IvS - 21 November 2013
 // e-mail: enrico.corsaro@ster.kuleuven.be
-// Header file "PolluxBackgroundModel.h"
-// Implementations contained in "PolluxBackgroundModel.cpp"
+// Header file "RedGiantBackgroundModel.h"
+// Implementations contained in "RedGiantBackgroundModel.cpp"
 
 
-#ifndef POLLUXBACKGROUNDMODEL_H
-#define POLLUXBACKGROUNDMODEL_H
+#ifndef REDGIANTBACKGROUNDMODEL_H
+#define REDGIANTBACKGROUNDMODEL_H
 
 #include <iostream>
 #include "BackgroundModel.h"
@@ -15,12 +15,12 @@ using namespace std;
 using Eigen::ArrayXd;
 typedef Eigen::Ref<Eigen::ArrayXd> RefArrayXd;
 
-class PolluxBackgroundModel : public BackgroundModel
+class RedGiantBackgroundModel : public BackgroundModel
 {
     public:
     
-        PolluxBackgroundModel(const RefArrayXd covariates);
-        ~PolluxBackgroundModel();
+        RedGiantBackgroundModel(const RefArrayXd covariates);
+        ~RedGiantBackgroundModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters){};
         virtual void predict(RefArrayXd predictions);

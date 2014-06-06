@@ -1,7 +1,7 @@
-#include "PolluxBackgroundModel.h"
+#include "RedGiantBackgroundModel.h"
 
 
-// PolluxBackgroundModel::PolluxBackgroundModel()
+// RedGiantBackgroundModel::RedGiantBackgroundModel()
 //
 // PURPOSE: 
 //      Constructor. Initializes model computation.
@@ -11,7 +11,7 @@
 //                              of the independent variable.
 //
 
-PolluxBackgroundModel::PolluxBackgroundModel(const RefArrayXd covariates)
+RedGiantBackgroundModel::RedGiantBackgroundModel(const RefArrayXd covariates)
 : BackgroundModel(covariates)
 {
     // Create response function modulating the sampling rate of input Kepler LC data
@@ -30,13 +30,13 @@ PolluxBackgroundModel::PolluxBackgroundModel(const RefArrayXd covariates)
 
 
 
-// PolluxBackgroundModel::PolluxBackgroundModel()
+// RedGiantBackgroundModel::RedGiantBackgroundModel()
 //
 // PURPOSE: 
 //      Destructor.
 //
 
-PolluxBackgroundModel::~PolluxBackgroundModel()
+RedGiantBackgroundModel::~RedGiantBackgroundModel()
 {
 
 }
@@ -50,7 +50,7 @@ PolluxBackgroundModel::~PolluxBackgroundModel()
 
 
 
-// PolluxBackgroundModel::predict()
+// RedGiantBackgroundModel::predict()
 //
 // PURPOSE:
 //      Builds the predictions from a Background model based on a configuration
@@ -67,41 +67,38 @@ PolluxBackgroundModel::~PolluxBackgroundModel()
 //      void
 //
 
-void PolluxBackgroundModel::predict(RefArrayXd predictions)
+void RedGiantBackgroundModel::predict(RefArrayXd predictions)
 {
     Nparameters = configuringParameters.size();
 
 
     // Initialize global parameters
 
-    double flatNoiseLevel = configuringParameters(0);
-    double amplitudeHarvey1 = configuringParameters(1);
-    double amplitudeHarvey2 = configuringParameters(2);
-    double amplitudeHarvey3 = configuringParameters(3);
-    double frequencyHarvey1 = configuringParameters(4);
-    double frequencyHarvey2 = configuringParameters(5);
-    double frequencyHarvey3 = configuringParameters(6);
-    double heightOscillation = configuringParameters(7);
-    double nuMax = configuringParameters(8);
-    double sigma = configuringParameters(9);
+    double flatNoiseLevel = modelParameters(0);
+    double amplitudeHarvey1 = modelParameters(1);
+    double frequencyHarvey1 = modelParameters(2);
+    double amplitudeHarvey2 = modelParameters(3);
+    double frequencyHarvey2 = modelParameters(4);
+    double amplitudeHarvey3 = modelParameters(5);
+    double frequencyHarvey3 = modelParameters(6);
 
 
     // Compute Harvey components and add them to the predictions
 
-    predictions = 2*Functions::PI*amplitudeHarvey1*amplitudeHarvey1/(frequencyHarvey1*(1.0 + (covariates/frequencyHarvey1).pow(4)));
-    predictions += 2*Functions::PI*amplitudeHarvey2*amplitudeHarvey2/(frequencyHarvey2*(1.0 + (covariates/frequencyHarvey2).pow(4)));
-    predictions += 2*Functions::PI*amplitudeHarvey3*amplitudeHarvey3/(frequencyHarvey3*(1.0 + (covariates/frequencyHarvey3).pow(4)));
+    double zeta = 2.0*sqrt(2.0)/Functions::PI;
+    predictions = zeta*amplitudeHarvey1*amplitudeHarvey1/(frequencyHarvey1*(1.0 + (covariates/frequencyHarvey1).pow(4)));
+    predictions += zeta*amplitudeHarvey2*amplitudeHarvey2/(frequencyHarvey2*(1.0 + (covariates/frequencyHarvey2).pow(4)));
+    predictions += zeta*amplitudeHarvey3*amplitudeHarvey3/(frequencyHarvey3*(1.0 + (covariates/frequencyHarvey3).pow(4)));
 
     
     // Modulate the model by the response function (apodization)
     
-    predictions *= responseFunction;        
+    predictions *= responseFunction;           
 
 
     // Add flat noise level component
 
     predictions += flatNoiseLevel;
-
     
 }
 
