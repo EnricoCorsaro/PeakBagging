@@ -55,9 +55,9 @@ RedGiantBackgroundModel::~RedGiantBackgroundModel()
 // PURPOSE:
 //      Builds the predictions from a Background model based on a configuration
 //      file that contains all the free parameters of the given model.
-//      This is an overloaded function, and its implementation is only given
-//      by the concrete derived class that implements the desired model for
-//      modeling the background.
+//      This is an overloaded function whose implementation is that of a 
+//      background model for a red giant star, according to the findings
+//      by Kallinger et al. 2014.
 //
 // INPUT:
 //      predictions:        one-dimensional array to contain the predictions
@@ -101,14 +101,3 @@ void RedGiantBackgroundModel::predict(RefArrayXd predictions)
     predictions += flatNoiseLevel;
     
 }
-
-
-
-
-
-
-
-
-
-
-
