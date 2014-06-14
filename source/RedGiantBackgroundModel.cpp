@@ -74,13 +74,13 @@ void RedGiantBackgroundModel::predict(RefArrayXd predictions)
 
     // Initialize global parameters
 
-    double flatNoiseLevel = modelParameters(0);
-    double amplitudeHarvey1 = modelParameters(1);
-    double frequencyHarvey1 = modelParameters(2);
-    double amplitudeHarvey2 = modelParameters(3);
-    double frequencyHarvey2 = modelParameters(4);
-    double amplitudeHarvey3 = modelParameters(5);
-    double frequencyHarvey3 = modelParameters(6);
+    double flatNoiseLevel = configuringParameters(0);
+    double amplitudeHarvey1 = configuringParameters(1);
+    double frequencyHarvey1 = configuringParameters(2);
+    double amplitudeHarvey2 = configuringParameters(3);
+    double frequencyHarvey2 = configuringParameters(4);
+    double amplitudeHarvey3 = configuringParameters(5);
+    double frequencyHarvey3 = configuringParameters(6);
 
 
     // Compute Harvey components and add them to the predictions
