@@ -1,12 +1,12 @@
 // Derived class for building a mixture of lorentzian profiles
 // Created by Enrico Corsaro @ IvS - 6 June 2014
 // e-mail: enrico.corsaro@ster.kuleuven.be
-// Header file "MixedModesMixtureModel.h"
-// Implementations contained in "MixedModesMixtureModel.cpp"
+// Header file "LorentzianSincMixtureModel.h"
+// Implementations contained in "LorentzianSincMixtureModel.cpp"
 
 
-#ifndef MIXEDMODESMIXTUREMODEL_H
-#define MIXEDMODESMIXTUREMODEL_H
+#ifndef LORENTZIANSINCMIXTUREMODEL_H
+#define LORENTZIANSINCMIXTUREMODEL_H
 
 #include <iostream>
 #include "BackgroundModel.h"
@@ -16,13 +16,13 @@ using Eigen::ArrayXd;
 typedef Eigen::Ref<Eigen::ArrayXd> RefArrayXd;
 
 
-class MixedModesMixtureModel : public Model
+class LorentzianSincMixtureModel : public Model
 {
     public:
     
-        MixedModesMixtureModel(const RefArrayXd covariates, const int Nresolved, const int Nunresolved,
+        LorentzianSincMixtureModel(const RefArrayXd covariates, const int Nresolved, const int Nunresolved,
                                const double frequencyResolution, BackgroundModel &backgroundModel);
-        ~MixedModesMixtureModel();
+        ~LorentzianSincMixtureModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
 

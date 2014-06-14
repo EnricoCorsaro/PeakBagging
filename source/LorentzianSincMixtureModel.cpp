@@ -1,7 +1,7 @@
-#include "MixedModesMixtureModel.h"
+#include "LorentzianSincMixtureModel.h"
 
 
-// MixedModesMixtureModel::MixedModesMixtureModel()
+// LorentzianSincMixtureModel::LorentzianSincMixtureModel()
 //
 // PURPOSE: 
 //      Constructor. Initializes model computation.
@@ -16,7 +16,7 @@
 //                              model for the background of the star.
 //
 
-MixedModesMixtureModel::MixedModesMixtureModel(const RefArrayXd covariates, const int Nresolved, const int Nunresolved, 
+LorentzianSincMixtureModel::LorentzianSincMixtureModel(const RefArrayXd covariates, const int Nresolved, const int Nunresolved, 
                                                const double frequencyResolution, BackgroundModel &backgroundModel)
 : Model(covariates),
   Nresolved(Nresolved),
@@ -38,13 +38,13 @@ MixedModesMixtureModel::MixedModesMixtureModel(const RefArrayXd covariates, cons
 
 
 
-// MixedModesMixtureModel::MixedModesMixtureModel()
+// LorentzianSincMixtureModel::LorentzianSincMixtureModel()
 //
 // PURPOSE: 
 //      Destructor.
 //
 
-MixedModesMixtureModel::~MixedModesMixtureModel()
+LorentzianSincMixtureModel::~LorentzianSincMixtureModel()
 {
 
 }
@@ -58,10 +58,10 @@ MixedModesMixtureModel::~MixedModesMixtureModel()
 
 
 
-// MixedModesMixtureModel::predict()
+// LorentzianSincMixtureModel::predict()
 //
 // PURPOSE:
-//      Builds the predictions from a MixedModesMixture model based on a simple
+//      Builds the predictions from a LorentzianSincMixture model based on a simple
 //      inputting of the central frequencies for all the desired modes to be fitted.
 //
 // INPUT:
@@ -82,7 +82,7 @@ MixedModesMixtureModel::~MixedModesMixtureModel()
 //      (v) Mode profile height (times the number of unresolved peaks)
 //
 
-void MixedModesMixtureModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
+void LorentzianSincMixtureModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
 {
     Nparameters = modelParameters.size();
     ArrayXd singleModePrediction = ArrayXd::Zero(covariates.size());
@@ -107,7 +107,7 @@ void MixedModesMixtureModel::predict(RefArrayXd predictions, RefArrayXd const mo
     
     for (int mode = 0; mode < Nunresolved; ++mode)
     {
-        centralFrequency = modelParameters(3*Nresolved + 2*mode);
+        double centralFrequency = modelParameters(3*Nresolved + 2*mode);
         double height = modelParameters(3*Nresolved + 2*mode + 1);
         
         Functions::modeProfileSinc(singleModePrediction, covariates, centralFrequency, height, frequencyResolution);
