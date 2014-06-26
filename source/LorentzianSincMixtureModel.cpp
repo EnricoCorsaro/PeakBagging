@@ -16,8 +16,8 @@
 //                              model for the background of the star.
 //
 
-LorentzianSincMixtureModel::LorentzianSincMixtureModel(const RefArrayXd covariates, const int Nresolved, const int Nunresolved, 
-                                               const double frequencyResolution, BackgroundModel &backgroundModel)
+LorentzianSincMixtureModel::LorentzianSincMixtureModel(RefArrayXd const covariates, const int Nresolved, const int Nunresolved, 
+                                                       const double frequencyResolution, BackgroundModel &backgroundModel)
 : Model(covariates),
   Nresolved(Nresolved),
   Nunresolved(Nunresolved),
@@ -108,7 +108,7 @@ void LorentzianSincMixtureModel::predict(RefArrayXd predictions, RefArrayXd cons
     for (int mode = 0; mode < Nunresolved; ++mode)
     {
         double centralFrequency = modelParameters(3*Nresolved + 2*mode);
-        double height = modelParameters(3*Nresolved + 2*mode + 1);
+        double height = modelParameters(3*Nresolved + 2*mode + 1);            // mixedModesHeights(mode);
         
         Functions::modeProfileSinc(singleModePrediction, covariates, centralFrequency, height, frequencyResolution);
         predictions += singleModePrediction;
@@ -124,14 +124,4 @@ void LorentzianSincMixtureModel::predict(RefArrayXd predictions, RefArrayXd cons
 
     predictions += backgroundPrediction;
 }
-
-
-
-
-
-
-
-
-
-
 
