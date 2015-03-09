@@ -20,7 +20,7 @@ class LorentzianMixtureModel : public Model
 {
     public:
     
-        LorentzianMixtureModel(const RefArrayXd covariates, const vector<int> &NparametersPerType, BackgroundModel &backgroundModel);
+        LorentzianMixtureModel(const RefArrayXd covariates, const int Npeaks, BackgroundModel &backgroundModel);
         ~LorentzianMixtureModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
@@ -31,9 +31,7 @@ class LorentzianMixtureModel : public Model
 
     private:
 
-        int NprofileParameters;                         // Number of parameters determining the shape 
-                                                        // of the mode profile (central frequency, height/amplitude, linewidth)
-        int Nmodes;                                     // Total number of modes to be fitted
+        int Npeaks;                                     // Total number of oscillation peaks to be fitted
         ArrayXd backgroundPrediction;                   // An array containing the prediction for the background in all the range of the covariates
         ArrayXd responseFunction;                       // An array containing the apodization response function for the signal of the input data
         ArrayXd backgroundParameters;                   // An array containing the configuring parameters for the background model adopted

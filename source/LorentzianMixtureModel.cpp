@@ -14,10 +14,9 @@
 //                              model for the background of the star.
 //
 
-LorentzianMixtureModel::LorentzianMixtureModel(const RefArrayXd covariates, const vector<int> &NparametersPerType, BackgroundModel &backgroundModel)
+LorentzianMixtureModel::LorentzianMixtureModel(const RefArrayXd covariates, const int Npeaks, BackgroundModel &backgroundModel)
 : Model(covariates),
-  NprofileParameters(NparametersPerType[0]),
-  Nmodes(NparametersPerType[1])
+  Npeaks(Npeaks)
 {
     backgroundPrediction.resize(covariates.size());
     backgroundModel.predict(backgroundPrediction);
@@ -71,22 +70,22 @@ LorentzianMixtureModel::~LorentzianMixtureModel()
 //
 // NOTE:
 //      The free parameters are to be given in the order
-//      (i) Mode central frequency (times the number of modes)
-//      (ii) Mode profile amplitude (times the number of modes)
-//      (iii) Mode profile linewidth (times the number of modes)
+//      (i) Mode central frequency (times the number of peaks)
+//      (ii) Mode profile amplitude (times the number of peaks)
+//      (iii) Mode profile linewidth (times the number of peaks)
 
 void LorentzianMixtureModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
 {
     Nparameters = modelParameters.size();
     ArrayXd singleModePrediction = ArrayXd::Zero(covariates.size());
 
-    for (int mode = 0; mode < Nmodes; ++mode)
+    for (int peak = 0; peak < Npeaks; ++peak)
     {
         // Initialize parameters of current mode with proper access to elements of total array of free parameters
 
-        double centralFrequency = modelParameters(NprofileParameters*mode);
-        double amplitude = modelParameters(NprofileParameters*mode + 1);
-        double linewidth = modelParameters(NprofileParameters*mode + 2);
+        double centralFrequency = modelParameters(3*peak);
+        double amplitude = modelParameters(3*peak + 1);
+        double linewidth = modelParameters(3*peak + 2);
 
         Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency, amplitude, linewidth);
         predictions += singleModePrediction;
