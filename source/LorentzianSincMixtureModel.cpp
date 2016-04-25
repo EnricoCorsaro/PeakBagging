@@ -84,7 +84,6 @@ LorentzianSincMixtureModel::~LorentzianSincMixtureModel()
 
 void LorentzianSincMixtureModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
 {
-    Nparameters = modelParameters.size();
     ArrayXd singleModePrediction = ArrayXd::Zero(covariates.size());
 
     

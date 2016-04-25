@@ -1,6 +1,6 @@
 // Derived class for building a mixture of lorentzian profiles
 // Created by Enrico Corsaro @ IvS - 6 June 2014
-// e-mail: enrico.corsaro@ster.kuleuven.be
+// e-mail: emncorsaro@gmail.com
 // Header file "LorentzianSincMixtureModel.h"
 // Implementations contained in "LorentzianSincMixtureModel.cpp"
 
