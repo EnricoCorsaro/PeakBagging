@@ -1,6 +1,6 @@
 // Derived abstract class for global background fit to RG stars.
 // Created by Enrico Corsaro @ IvS - 21 November 2013
-// e-mail: enrico.corsaro@ster.kuleuven.be
+// e-mail: emncorsaro@gmail.com
 // Header file "BackgroundModel.h"
 // Implementations contained in "BackgroundModel.cpp"
 
@@ -25,7 +25,10 @@ class BackgroundModel : public Model
         BackgroundModel(const RefArrayXd covariates);
         ~BackgroundModel();
 
+        void readNyquistFrequencyFromFile(const string inputFileName);
         void readConfiguringParametersFromFile(const string inputFileName);
+
+        double getNyquistFrequency();
         ArrayXd getConfiguringParameters();
         ArrayXd getResponseFunction();
 
@@ -36,6 +39,7 @@ class BackgroundModel : public Model
 
     protected:
 
+        double NyquistFrequency;
         ArrayXd configuringParameters;
         ArrayXd responseFunction;               // An array containing the apodization response function for the signal of the input data
 

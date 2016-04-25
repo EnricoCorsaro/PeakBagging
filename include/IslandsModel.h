@@ -1,6 +1,6 @@
 // Derived class for building mono lorentzian profile models
 // Created by Enrico Corsaro @ IvS - 29 March 2014
-// e-mail: enrico.corsaro@ster.kuleuven.be
+// e-mail: emncorsaro@gmail.com
 // Header file "IslandsModel.h"
 // Implementations contained in "IslandsModel.cpp"
 

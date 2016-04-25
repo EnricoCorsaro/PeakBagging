@@ -1,7 +1,7 @@
-#include "RedGiantBackgroundModel.h"
+#include "FullBackgroundModel.h"
 
 
-// RedGiantBackgroundModel::RedGiantBackgroundModel()
+// FullBackgroundModel::FullBackgroundModel()
 //
 // PURPOSE: 
 //      Constructor. Initializes model computation.
@@ -9,16 +9,22 @@
 // INPUT:
 //      covariates:             one-dimensional array containing the values
 //                              of the independent variable.
+//      inputNyquestFrequencyFileName:      the string containing the file name of the input ASCII file with the
+//                                          value of the Nyquist frequency to be adopted in the response function
 //
 
-RedGiantBackgroundModel::RedGiantBackgroundModel(const RefArrayXd covariates)
+FullBackgroundModel::FullBackgroundModel(const RefArrayXd covariates, const string inputNyquistFrequencyFileName)
 : BackgroundModel(covariates)
 {
     // Create response function modulating the sampling rate of input Kepler LC data
 
-    double NyquistFrequency = 283.2116656017908;    // muHz
+    // NyquistFrequency = 8496.355743094671     muHz     // Kepler SC
+    // NyquistFrequency = 283.2116656017908     muHz     // Kepler LC
+
+    readNyquistFrequencyFromFile(inputNyquistFrequencyFileName);
+
     ArrayXd sincFunctionArgument = (Functions::PI / 2.0) * covariates / NyquistFrequency;
-    responseFunction = (sincFunctionArgument.sin() / sincFunctionArgument).square(); 
+    responseFunction = (sincFunctionArgument.sin() / sincFunctionArgument).square();
 }
 
 
@@ -30,13 +36,13 @@ RedGiantBackgroundModel::RedGiantBackgroundModel(const RefArrayXd covariates)
 
 
 
-// RedGiantBackgroundModel::RedGiantBackgroundModel()
+// FullBackgroundModel::FullBackgroundModel()
 //
 // PURPOSE: 
 //      Destructor.
 //
 
-RedGiantBackgroundModel::~RedGiantBackgroundModel()
+FullBackgroundModel::~FullBackgroundModel()
 {
 
 }
@@ -50,14 +56,14 @@ RedGiantBackgroundModel::~RedGiantBackgroundModel()
 
 
 
-// RedGiantBackgroundModel::predict()
+// FullBackgroundModel::predict()
 //
 // PURPOSE:
 //      Builds the predictions from a Background model based on a configuration
 //      file that contains all the free parameters of the given model.
 //      This is an overloaded function whose implementation is that of a 
 //      background model for a red giant star, according to the findings
-//      by Kallinger et al. 2014.
+//      by Kallinger et al. 2014. This includes a colored noise for low-numax stars.
 //
 // INPUT:
 //      predictions:        one-dimensional array to contain the predictions
@@ -67,20 +73,19 @@ RedGiantBackgroundModel::~RedGiantBackgroundModel()
 //      void
 //
 
-void RedGiantBackgroundModel::predict(RefArrayXd predictions)
+void FullBackgroundModel::predict(RefArrayXd predictions)
 {
-    Nparameters = configuringParameters.size();
-
-
     // Initialize global parameters
 
     double flatNoiseLevel = configuringParameters(0);
-    double amplitudeHarvey1 = configuringParameters(1);
-    double frequencyHarvey1 = configuringParameters(2);
-    double amplitudeHarvey2 = configuringParameters(3);
-    double frequencyHarvey2 = configuringParameters(4);
-    double amplitudeHarvey3 = configuringParameters(5);
-    double frequencyHarvey3 = configuringParameters(6);
+    double amplitudeNoise = configuringParameters(1);
+    double frequencyNoise = configuringParameters(2);
+    double amplitudeHarvey1 = configuringParameters(3);
+    double frequencyHarvey1 = configuringParameters(4);
+    double amplitudeHarvey2 = configuringParameters(5);
+    double frequencyHarvey2 = configuringParameters(6);
+    double amplitudeHarvey3 = configuringParameters(7);
+    double frequencyHarvey3 = configuringParameters(8);
 
 
     // Compute Harvey components and add them to the predictions
@@ -96,8 +101,9 @@ void RedGiantBackgroundModel::predict(RefArrayXd predictions)
     predictions *= responseFunction;           
 
 
-    // Add flat noise level component
+    // Add flat noise and colored noise components
 
     predictions += flatNoiseLevel;
+    predictions += 2.0*Functions::PI*amplitudeNoise*amplitudeNoise/(frequencyNoise*(1.0 + (covariates/frequencyNoise).pow(2)));
     
 }
