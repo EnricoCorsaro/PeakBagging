@@ -26,12 +26,11 @@ class BackgroundModel : public Model
         ~BackgroundModel();
 
         void readNyquistFrequencyFromFile(const string inputFileName);
-        void readConfiguringParametersFromFile(const string inputFileName);
-
         double getNyquistFrequency();
         ArrayXd getConfiguringParameters();
         ArrayXd getResponseFunction();
 
+        virtual void readConfiguringParametersFromFile(const string inputFileName) = 0;
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters) = 0;
         virtual void predict(RefArrayXd predictions) = 0;
     

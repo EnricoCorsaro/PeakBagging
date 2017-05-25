@@ -22,6 +22,7 @@ class FullBackgroundModel : public BackgroundModel
         FullBackgroundModel(const RefArrayXd covariates, const string inputNyquistFrequencyFileName);
         ~FullBackgroundModel();
 
+        virtual void readConfiguringParametersFromFile(const string inputFileName);
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters){};
         virtual void predict(RefArrayXd predictions);
 

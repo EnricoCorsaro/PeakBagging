@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     // Creating frequency and PSD arrays
     ArrayXd covariates = data.col(0);
     ArrayXd observations = data.col(1);
-   
+
 
     // Read input frequency range of the PSD
     inputFileName = outputDirName + "frequencyRange.txt";
@@ -86,8 +86,7 @@ int main(int argc, char *argv[])
 
     double lowerFrequency = frequencyRange(0);        // muHz
     double upperFrequency = frequencyRange(1);        // muHz
-
-
+    
     // Trim input dataset in the given frequency range
     vector<int> trimIndices = Functions::findArrayIndicesWithinBoundaries(covariates, lowerFrequency, upperFrequency);
     int Nbins = trimIndices.size();
@@ -106,7 +105,6 @@ int main(int argc, char *argv[])
          << covariates.maxCoeff() 
          << "] muHz" << endl;
     cout << endl;
-
     
     // -------------------------------------------------------
     // ----- First step. Set up all prior distributions -----
@@ -269,8 +267,8 @@ int main(int argc, char *argv[])
     int maxNdrawAttempts = configuringParameters(2);    // Maximum number of attempts when trying to draw a new sampling point
     int NinitialIterationsWithoutClustering = configuringParameters(3); // The first N iterations, we assume that there is only 1 cluster
     int NiterationsWithSameClustering = configuringParameters(4);       // Clustering is only happening every N iterations.
-    double initialEnlargementFraction = configuringParameters(5);   //0.267*pow(Ndimensions,0.643);   // configuringParameters(5);   // Fraction by which each axis in an ellipsoid has to be enlarged.
-                                                                    // It can be a number >= 0, where 0 means no enlargement.
+    double initialEnlargementFraction = configuringParameters(5);       //0.267*pow(Ndimensions,0.643);   //    // Fraction by which each axis in an ellipsoid has to be enlarged.
+                                                                        // It can be a number >= 0, where 0 means no enlargement.
     double shrinkingRate = configuringParameters(6);        // Exponent for remaining prior mass in ellipsoid enlargement fraction.
                                                             // It is a number between 0 and 1. The smaller the slower the shrinkage
                                                             // of the ellipsoids.

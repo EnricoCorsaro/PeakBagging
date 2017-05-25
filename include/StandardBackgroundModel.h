@@ -22,6 +22,7 @@ class StandardBackgroundModel : public BackgroundModel
         StandardBackgroundModel(const RefArrayXd covariates, const string inputNyquistFrequencyFromFile);
         ~StandardBackgroundModel();
 
+        virtual void readConfiguringParametersFromFile(const string inputFileName);
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters){};
         virtual void predict(RefArrayXd predictions);
 

@@ -54,6 +54,50 @@ StandardBackgroundModel::~StandardBackgroundModel()
 
 
 
+// StandardBackgroundModel::readConfiguringParametersFromFile()
+//
+// PURPOSE:
+//      Reads the configuring parameters of the model from an input file
+//      specified by its full path as a string. The values are then
+//      store into a vector which is a protected data member and that can
+//      be therefore accessed from a derived class that implements the model.
+//
+// INPUT:
+//      inputFileName:      a string specifying the full path (filename included) of the input file to read.
+//
+// OUTPUT:
+//      void
+//
+
+void StandardBackgroundModel::readConfiguringParametersFromFile(const string inputFileName)
+{
+    ifstream inputFile;
+    File::openInputFile(inputFile, inputFileName);
+
+    unsigned long Nrows;
+    int Ncols;
+
+    File::sniffFile(inputFile, Nrows, Ncols);
+    
+    if (Nrows != 7)
+    {
+        cerr << "Wrong number of parameters that define the standard background model (7 parameters expected)." << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    configuringParameters.resize(Nrows);
+    configuringParameters = File::arrayXXdFromFile(inputFile, Nrows, Ncols);
+
+    inputFile.close();
+}
+
+
+
+
+
+
+
+
 // StandardBackgroundModel::predict()
 //
 // PURPOSE:
