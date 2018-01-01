@@ -1,5 +1,6 @@
 // Main code for peak bagging by means of nested sampling analysis
 // Created by Enrico Corsaro @ CEA - January 2016
+// Modiefied @ OACT - August 2017
 // e-mail: emncorsaro@gmail.com
 // Source code file "PeakBagging.cpp"
 
@@ -19,6 +20,7 @@
 #include "ExponentialLikelihood.h"
 #include "LorentzianSincMixtureModel.h"
 #include "StandardBackgroundModel.h"
+#include "ConstantBackgroundModel.h"
 #include "FullBackgroundModel.h"
 #include "PowerlawReducer.h"
 #include "Results.h"
@@ -62,6 +64,10 @@ int main(int argc, char *argv[])
     string baseOutputDirName = myLocalPath[0] + "results/KIC" + KICID + "/";
     string outputDirName = baseOutputDirName + outputSubDirName + "/";
     string outputPathPrefix = outputDirName + runNumber + "/peakbagging_";
+    
+    cout << " Peak bagging analysis of KIC " 
+         << KICID << endl;
+    cout << endl;
 
    
     // Read the input dataset
@@ -187,8 +193,8 @@ int main(int argc, char *argv[])
     
     // Chose a model for background and configure it, then do the same for the peakbagging model.
     inputFileName = baseOutputDirName + "NyquistFrequency.txt";
-    StandardBackgroundModel backgroundModel(covariates, inputFileName);             // Model by Kallinger et al. 2014 - No colored-noise component
-    // FullBackgroundModel backgroundModel(covariates, inputFileName);             // Model by Kallinger et al. 2014 - Colored-noise component included
+    // FullBackgroundModel backgroundModel(covariates, inputFileName);     // Model by Kallinger et al. 2014 - colored noise included
+    StandardBackgroundModel backgroundModel(covariates, inputFileName);     // Model by Kallinger et al. 2014 - no colored noise included
     string backgroundConfiguringParameters = baseOutputDirName + "backgroundParameters.txt";
     backgroundModel.readConfiguringParametersFromFile(backgroundConfiguringParameters);
     LorentzianSincMixtureModel model(covariates, Nresolved, Nunresolved, frequencyResolution, backgroundModel);
@@ -258,26 +264,20 @@ int main(int argc, char *argv[])
     int initialNobjects = configuringParameters(0);     // Initial number of live points 
     int minNobjects = configuringParameters(1);         // Minimum number of live points 
     
-    if (Ndimensions >= 20)
-    {
-        initialNobjects = 1000;
-        minNobjects = 1000;
-    }
-
     int maxNdrawAttempts = configuringParameters(2);    // Maximum number of attempts when trying to draw a new sampling point
     int NinitialIterationsWithoutClustering = configuringParameters(3); // The first N iterations, we assume that there is only 1 cluster
     int NiterationsWithSameClustering = configuringParameters(4);       // Clustering is only happening every N iterations.
-    double initialEnlargementFraction = 0.267*pow(Ndimensions,0.643);   // configuringParameters(5);    // Fraction by which each axis in an ellipsoid has to be enlarged.
+    double initialEnlargementFraction = 0.369*pow(Ndimensions,0.574);   // For Nlive = 500    // configuringParameters(5); 
                                                                         // It can be a number >= 0, where 0 means no enlargement.
     double shrinkingRate = configuringParameters(6);        // Exponent for remaining prior mass in ellipsoid enlargement fraction.
                                                             // It is a number between 0 and 1. The smaller the slower the shrinkage
                                                             // of the ellipsoids.
                                                             
-    if ((shrinkingRate > 1) || (shrinkingRate) < 0)
-    {
-        cerr << "Shrinking Rate for ellipsoids must be in the range [0, 1]. " << endl;
-        exit(EXIT_FAILURE);
-    }
+    // if ((shrinkingRate > 1) || (shrinkingRate) < 0)
+    // {
+    //    cerr << "Shrinking Rate for ellipsoids must be in the range [0, 1]. " << endl;
+    //    exit(EXIT_FAILURE);
+    // }
 
     double terminationFactor = configuringParameters(7);    // Termination factor for nested sampling process.
 
@@ -316,6 +316,8 @@ int main(int argc, char *argv[])
     results.writeLogLikelihoodToFile("logLikelihood.txt");
     results.writeEvidenceInformationToFile("evidenceInformation.txt");
     results.writePosteriorProbabilityToFile("posteriorDistribution.txt");
+    results.writeLogEvidenceToFile("logEvidence.txt");
+    results.writeLogMeanLiveEvidenceToFile("logMeanLiveEvidence.txt");
 
     double credibleLevel = 68.3;
     bool writeMarginalDistributionToFile = true;

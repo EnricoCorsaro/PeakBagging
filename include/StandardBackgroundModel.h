@@ -1,4 +1,4 @@
-// Derived concrete class for global background fit to RG stars.
+// Derived concrete class for standard background model (no colored-noise component) for oscillating stars with photometry.
 // Created by Enrico Corsaro @ CEA - January 2016
 // e-mail: emncorsaro@gmail.com
 // Header file "StandardBackgroundModel.h"
