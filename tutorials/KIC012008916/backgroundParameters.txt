@@ -1,0 +1,17 @@
+# Configuring parameters for background model KIC012008916
+# These parameters are the median values of the result derived
+# from the Background code based on NSMC.
+# Row #1: white noise
+# Row #2: sigma_long
+# Row #3: freq_long
+# Row #4: sigma_gran1
+# Row #5: freq_gran1
+# Row #6: sigma_gran2
+# Row #7: freq_gran2
+15.81400202
+91.16781429
+1.02736335
+171.94339450
+40.86096971
+159.12532640
+156.38723440

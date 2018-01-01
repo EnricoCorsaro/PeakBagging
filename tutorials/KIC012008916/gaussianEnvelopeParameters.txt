@@ -1,0 +1,7 @@
+# Parameters of the Gaussian envelope fit for background model of KIC012008916
+# Row #1: height
+# Row #2: numax
+# Row #3: sigma_env
+2.680166972e+02
+1.619189911e+02
+1.507870759e+01
