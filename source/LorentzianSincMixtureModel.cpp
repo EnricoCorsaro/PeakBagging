@@ -26,7 +26,6 @@ LorentzianSincMixtureModel::LorentzianSincMixtureModel(RefArrayXd const covariat
     backgroundPrediction.resize(covariates.size());
     backgroundModel.predict(backgroundPrediction);
     responseFunction = backgroundModel.getResponseFunction();
-    backgroundParameters = backgroundModel.getConfiguringParameters();
 }
 
 

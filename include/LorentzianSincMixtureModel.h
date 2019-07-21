@@ -36,7 +36,6 @@ class LorentzianSincMixtureModel : public Model
         double frequencyResolution;             // The frequency bin size used to compute the sinc-square profile
         ArrayXd backgroundPrediction;           // An array containing the prediction for the background in all the range of the covariates
         ArrayXd responseFunction;               // An array containing the apodization response function for the signal of the input data
-        ArrayXd backgroundParameters;           // An array containing the configuring parameters for the background model adopted
 
 }; 
 
