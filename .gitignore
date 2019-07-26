@@ -9,7 +9,10 @@ include/Other/*
 include/.*swo
 include/.*swp
 results/
+data/*
+data/*.txt
 data/Simulations/*
+Stars_FWHM
 
 # Compiled source 
 
