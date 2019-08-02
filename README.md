@@ -14,7 +14,7 @@
 
 ### Short description
 <div align="justify">
-The PeakBagging extension to DIAMONDS is an extension of the Bayesian inference code DIAMONDS to perform the fitting of the oscillation peaks in the power spectrum of a solar-like  or red giant star. The tool can also be used for the peak significance test by means of the Bayesian model comparison. It currently implements several modalities to perform a fit, including the multi-modal approach, e.g. see [Corsaro 2019](https://www.frontiersin.org/articles/10.3389/fspas.2019.00021/full) for more details. In addition, background models can be changed at runtime by choosing the reference name for the background that is desired.
+The PeakBagging extension to DIAMONDS is an extension of the Bayesian inference code DIAMONDS to perform the fitting of the oscillation peaks in the power spectrum of a solar-like  or red giant star. The tool can also be used for the peak significance test by means of the Bayesian model comparison. It currently implements several modalities to perform a fit, including the multi-modal approach, e.g. see <a href="https://www.frontiersin.org/articles/10.3389/fspas.2019.00021/full">Corsaro 2019</a> for more details. In addition, background models can be changed at runtime by choosing the reference name for the background that is desired.
 </div>
 
 ### Download & Installation
