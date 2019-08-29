@@ -30,7 +30,7 @@ class LorentzianMixtureModel : public Model
 
     private:
 
-        int Nresolved;                          // Total number of p modes and resolved (or partially resolved) mixed modes to be fitted
+        int Nresolved;                          // Total number of p modes and resolved, partially resolved, or unresolved mixed modes to be fitted
         ArrayXd backgroundPrediction;           // An array containing the prediction for the background in all the range of the covariates
         ArrayXd responseFunction;               // An array containing the apodization response function for the signal of the input data
 
