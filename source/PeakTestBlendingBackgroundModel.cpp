@@ -1,7 +1,7 @@
-#include "PeakTestTwoLorentziansBackgroundModel.h"
+#include "PeakTestBlendingBackgroundModel.h"
 
 
-// PeakTestTwoLorentziansBackgroundModel::PeakTestTwoLorentziansBackgroundModel()
+// PeakTestBlendingBackgroundModel::PeakTestBlendingBackgroundModel()
 //
 // PURPOSE: 
 //      Constructor. Initializes model computation.
@@ -13,7 +13,7 @@
 //                              model for the background of the star.
 //
 
-PeakTestTwoLorentziansBackgroundModel::PeakTestTwoLorentziansBackgroundModel(RefArrayXd const covariates, BackgroundModel &backgroundModel)
+PeakTestBlendingBackgroundModel::PeakTestBlendingBackgroundModel(RefArrayXd const covariates, BackgroundModel &backgroundModel)
 : Model(covariates)
 {
     backgroundPrediction.resize(covariates.size());
@@ -30,13 +30,13 @@ PeakTestTwoLorentziansBackgroundModel::PeakTestTwoLorentziansBackgroundModel(Ref
 
 
 
-// PeakTestTwoLorentziansBackgroundModel::PeakTestTwoLorentziansBackgroundModel()
+// PeakTestBlendingBackgroundModel::PeakTestBlendingBackgroundModel()
 //
 // PURPOSE: 
 //      Destructor.
 //
 
-PeakTestTwoLorentziansBackgroundModel::~PeakTestTwoLorentziansBackgroundModel()
+PeakTestBlendingBackgroundModel::~PeakTestBlendingBackgroundModel()
 {
 
 }
@@ -50,10 +50,10 @@ PeakTestTwoLorentziansBackgroundModel::~PeakTestTwoLorentziansBackgroundModel()
 
 
 
-// PeakTestTwoLorentziansBackgroundModel::predict()
+// PeakTestBlendingBackgroundModel::predict()
 //
 // PURPOSE:
-//      Builds the predictions from a PeakTestTwoLorentziansBackground model to
+//      Builds the predictions from a PeakTestBlendingBackground model to
 //      construct two Lorentzian profiles on top of a varying background level.
 //      
 //
@@ -77,7 +77,7 @@ PeakTestTwoLorentziansBackgroundModel::~PeakTestTwoLorentziansBackgroundModel()
 //      (vii) Noise factor to change the level of background
 //
 
-void PeakTestTwoLorentziansBackgroundModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
+void PeakTestBlendingBackgroundModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
 {
     ArrayXd singleModePrediction = ArrayXd::Zero(covariates.size());
 

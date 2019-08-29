@@ -1,12 +1,12 @@
-// Derived class for fitting two lorentzian profiles.
+// Derived class for fitting two lorentzian profiles in a blended form.
 // Created by Enrico Corsaro @ INAF-OACT - July 2019
 // e-mail: emncorsaro@gmail.com
-// Header file "PeakTestTwoLorentziansBackgroundModel.h"
-// Implementations contained in "PeakTestTwoLorentziansBackgroundModel.cpp"
+// Header file "PeakTestBlendingBackgroundModel.h"
+// Implementations contained in "PeakTestBlendingBackgroundModel.cpp"
 
 
-#ifndef PEAKTESTTWOLORENTZIANSBACKGROUNDMODEL_H
-#define PEAKTESTTWOLORENTZIANSBACKGROUNDMODEL_H
+#ifndef PEAKTESTBLENDINGBACKGROUNDMODEL_H
+#define PEAKTESTBLENDINGBACKGROUNDMODEL_H
 
 #include <iostream>
 #include "BackgroundModel.h"
@@ -16,12 +16,12 @@ using Eigen::ArrayXd;
 typedef Eigen::Ref<Eigen::ArrayXd> RefArrayXd;
 
 
-class PeakTestTwoLorentziansBackgroundModel : public Model
+class PeakTestBlendingBackgroundModel : public Model
 {
     public:
     
-        PeakTestTwoLorentziansBackgroundModel(RefArrayXd const covariates, BackgroundModel &backgroundModel); 
-        ~PeakTestTwoLorentziansBackgroundModel();
+        PeakTestBlendingBackgroundModel(RefArrayXd const covariates, BackgroundModel &backgroundModel); 
+        ~PeakTestBlendingBackgroundModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
 
