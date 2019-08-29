@@ -1,13 +1,13 @@
-// Derived class for fitting a single lorentzian profile with rotationally
-// split components.
+// Derived class for fitting a single Lorentzian profile with rotationally
+// split components (intended as a dipole splitting).
 // Created by Enrico Corsaro @ INAF-OACT - July 2019
 // e-mail: emncorsaro@gmail.com
-// Header file "PeakTestLorentzianRotationModel.h"
-// Implementations contained in "PeakTestLorentzianRotationModel.cpp"
+// Header file "PeakTestDipoleRotationModel.h"
+// Implementations contained in "PeakTestDipoleRotationModel.cpp"
 
 
-#ifndef PEAKTESTLORENTZIANROTATIONMODEL_H
-#define PEAKTESTLORENTZIANROTATIONMODEL_H
+#ifndef PEAKTESTDIPOLEROTATIONMODEL_H
+#define PEAKTESTDIPOLEROTATIONMODEL_H
 
 #include <iostream>
 #include "BackgroundModel.h"
@@ -17,12 +17,12 @@ using Eigen::ArrayXd;
 typedef Eigen::Ref<Eigen::ArrayXd> RefArrayXd;
 
 
-class PeakTestLorentzianRotationModel : public Model
+class PeakTestDipoleRotationModel : public Model
 {
     public:
     
-        PeakTestLorentzianRotationModel(RefArrayXd const covariates, BackgroundModel &backgroundModel); 
-        ~PeakTestLorentzianRotationModel();
+        PeakTestDipoleRotationModel(RefArrayXd const covariates, BackgroundModel &backgroundModel); 
+        ~PeakTestDipoleRotationModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
 

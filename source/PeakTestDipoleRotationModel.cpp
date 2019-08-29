@@ -1,7 +1,7 @@
-#include "PeakTestLorentzianRotationModel.h"
+#include "PeakTestDipoleRotationModel.h"
 
 
-// PeakTestLorentzianRotationModel::PeakTestLorentzianRotationModel()
+// PeakTestDipoleRotationModel::PeakTestDipoleRotationModel()
 //
 // PURPOSE: 
 //      Constructor. Initializes model computation.
@@ -13,7 +13,7 @@
 //                              model for the background of the star.
 //
 
-PeakTestLorentzianRotationModel::PeakTestLorentzianRotationModel(RefArrayXd const covariates, BackgroundModel &backgroundModel)
+PeakTestDipoleRotationModel::PeakTestDipoleRotationModel(RefArrayXd const covariates, BackgroundModel &backgroundModel)
 : Model(covariates)
 {
     backgroundPrediction.resize(covariates.size());
@@ -30,13 +30,13 @@ PeakTestLorentzianRotationModel::PeakTestLorentzianRotationModel(RefArrayXd cons
 
 
 
-// PeakTestLorentzianRotationModel::PeakTestLorentzianRotationModel()
+// PeakTestDipoleRotationModel::PeakTestDipoleRotationModel()
 //
 // PURPOSE: 
 //      Destructor.
 //
 
-PeakTestLorentzianRotationModel::~PeakTestLorentzianRotationModel()
+PeakTestDipoleRotationModel::~PeakTestDipoleRotationModel()
 {
 
 }
@@ -50,12 +50,12 @@ PeakTestLorentzianRotationModel::~PeakTestLorentzianRotationModel()
 
 
 
-// PeakTestLorentzianRotationModel::predict()
+// PeakTestDipoleRotationModel::predict()
 //
 // PURPOSE:
-//      Builds the predictions from a PeakTestLorentzianRotation model to
-//      construct a Lorentzian profile with rotationally split components
-//      on top of a fixed background level. Note that the Lorentzian
+//      Builds the predictions from a PeakTestDipoleRotation model to
+//      construct a Dipole profile with rotationally split components
+//      on top of a fixed background level. Note that the Dipole
 //      profile here considered is assumed to be only a ell = 1 mode, hence
 //      having at most three rotationally split components.
 //      
@@ -78,10 +78,11 @@ PeakTestLorentzianRotationModel::~PeakTestLorentzianRotationModel()
 //      (v) Inclination angle of stellar rotation axis
 //
 
-void PeakTestLorentzianRotationModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
+void PeakTestDipoleRotationModel::predict(RefArrayXd predictions, RefArrayXd const modelParameters)
 {
     ArrayXd singleModePrediction = ArrayXd::Zero(covariates.size());
 
+    
     // Initialize parameters of the oscillation mode
 
     double centralFrequency = modelParameters(0);
@@ -107,9 +108,9 @@ void PeakTestLorentzianRotationModel::predict(RefArrayXd predictions, RefArrayXd
                                         amplitude*sqrt(modeVisibilityComponent), linewidth);
     predictions += singleModePrediction;
     
-    
+   
     // m = -1
-    
+
     Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency - rotationalSplitting, 
                                         amplitude*sqrt(modeVisibilityComponent), linewidth);
     predictions += singleModePrediction;
