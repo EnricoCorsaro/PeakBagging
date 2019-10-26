@@ -17,3 +17,4 @@ To run the tutorial follow the procedure:
 8. Execute the code for the second run (excluding the peak to be tested) by using the command line 
 `./peakbagging KIC 012008916 pb 0A ThreeHarvey prior_hyperParameters -1 0 0 0`
 9. Compare the output Bayesian evidences from the two models to check whether the peak is significant or not
+10. Once the computation is completed, you can plot the results with Python by using `plot_peakbagging.py` provided in the tutorials folder. The routine is set up in a way that it will plot the results from your folder `0`. Please make sure that all paths set inside the Python routines match correctly with your actual working paths for PeakBagging.
