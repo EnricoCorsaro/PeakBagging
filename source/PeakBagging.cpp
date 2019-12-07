@@ -18,7 +18,7 @@
 #include "ExponentialLikelihood.h"
 #include "SingleLorentzianFixedLinewidthModel.h"
 #include "DoubleLorentzianFixedLinewidthModel.h"
-#include "AsymptoticPatternModel.h"
+#include "SlidingPatternModel.h"
 #include "LorentzianMixtureModel.h"
 #include "LorentzianSincMixtureModel.h"
 #include "LorentzianRotationMixtureModel.h"
@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
 
 
     // Read the local path for the working session from an input ASCII file
+    
     ifstream inputFile;
     File::openInputFile(inputFile, "localPath.txt");
     File::sniffFile(inputFile, Nrows, Ncols);
@@ -79,6 +80,7 @@ int main(int argc, char *argv[])
     
 
     // Set up some string paths used in the computation
+    
     string baseInputDirName = myLocalPath[0] + "data/";
     string inputFileName = baseInputDirName + CatalogID + StarID + ".txt";
     string outputSubDirName(argv[3]);
@@ -124,6 +126,7 @@ int main(int argc, char *argv[])
 
    
     // Read the input dataset
+    
     File::openInputFile(inputFile, inputFileName);
     File::sniffFile(inputFile, Nrows, Ncols);
     data = File::arrayXXdFromFile(inputFile, Nrows, Ncols);
@@ -131,40 +134,12 @@ int main(int argc, char *argv[])
 
 
     // Creating frequency and PSD arrays
+
     ArrayXd covariates = data.col(0);
     ArrayXd observations = data.col(1);
     double frequencyResolution = covariates(1) - covariates(0);
     double lowerFrequency;
     double upperFrequency;
-
-
-    // If the fit has to be done in a uni-modal high-dimensional manner, then expect an input file to provide the frequency boundaries to perform the fit.
-    // In this case the PSD will be trimmed according to an input frequency range.
-    // If the fit is multi-modal, or a peak testing has to be performed, or the asymptotic pattern is fitted, then skip this part.
-    if (peakTestFlag != 1 && asymptoticFlag != 1 && peakLinewidth < 0.0)
-    {
-        // Read input frequency range of the PSD
-        inputFileName = outputDirName + "frequencyRange_" + runNumber + ".txt";
-        File::openInputFile(inputFile, inputFileName);
-        File::sniffFile(inputFile, Nrows, Ncols);
-        ArrayXXd frequencyRange(Nrows, Ncols);
-        frequencyRange = File::arrayXXdFromFile(inputFile, Nrows, Ncols);
-        inputFile.close();
-
-        lowerFrequency = frequencyRange(0);        // muHz
-        upperFrequency = frequencyRange(1);        // muHz
-    
-        // Trim input dataset in the given frequency range
-        vector<int> trimIndices = Functions::findArrayIndicesWithinBoundaries(covariates, lowerFrequency, upperFrequency);
-        int Nbins = trimIndices.size();
-        ArrayXd trimmedArray(Nbins);
-        trimmedArray = covariates.segment(trimIndices[0],Nbins);
-        covariates.resize(Nbins);
-        covariates = trimmedArray;
-        trimmedArray = observations.segment(trimIndices[0],Nbins);
-        observations.resize(Nbins);
-        observations = trimmedArray;
-    }
 
 
     // -------------------------------------------------------
@@ -173,7 +148,9 @@ int main(int argc, char *argv[])
     
     unsigned long Nparameters;              // Number of parameters for which prior distributions are defined
 
-    // ---- Read prior hyper parameters for resolved modes -----
+    
+    // Read prior hyper parameters from an input file
+    
     inputFileName = outputDirName + inputPriorBaseName + "_" + runNumber + ".txt";
     File::openInputFile(inputFile, inputFileName);
     File::sniffFile(inputFile, Nparameters, Ncols);
@@ -181,10 +158,11 @@ int main(int argc, char *argv[])
   
     if (asymptoticFlag == 1)
     {
-        if (Nparameters != 2)
+        if (Nparameters != 8)
         {
             cerr << "Wrong number of input prior hyper-parameters." << endl;
-            cerr << "When performing an asymptotic pattern fit, there are only two free parameters." << endl;
+            cerr << "When performing an asymptotic pattern fit, there are up to 8 free parameters." << endl;
+            exit(EXIT_FAILURE);
         }
     }
     else
@@ -198,10 +176,10 @@ int main(int argc, char *argv[])
                 cerr << "(A) - Only background (Ndimensions = 1). " << endl;
                 cerr << "(B) - Background plus Lorentzian profile (Ndimensions = 4). " << endl;
                 cerr << "(C) - Background plus Sinc^2 profile (Ndimensions = 3). " << endl;
-                cerr << "(D) - Background plus two Lorentzian profiles for blending (Ndimensions = 7). " << endl;
+                cerr << "(D) - Background plus two Lorentzian profiles for blending test (Ndimensions = 7). " << endl;
                 cerr << "(E) - One Lorentzian profile with fixed background (Ndimensions = 3). " << endl;
                 cerr << "(F) - One Lorentzian profile with rotationally split components and fixed background (Ndimensions = 5). " << endl;
-                cerr << "(G) - Two Lorentzian profiles with fixed background for duplet (Ndimensions = 6). " << endl;
+                cerr << "(G) - Two Lorentzian profiles with fixed background for duplet fit (Ndimensions = 6). " << endl;
                 exit(EXIT_FAILURE);
             }
         }
@@ -253,6 +231,7 @@ int main(int argc, char *argv[])
 
     int Ndimensions = Nparameters;              // Total number of dimensions of the peak bagging model
 
+    
     // Uniform Prior
     
     int NpriorTypes = 1;                                        // Total number of prior types included in the computation
@@ -262,8 +241,21 @@ int main(int argc, char *argv[])
     ArrayXd parametersMaxima;                      // Maxima for prior PDF
     
     double sincProfileIsUsed = false;
+
+    
+    // Set sliding pattern parameters to be free by default
+
+    ArrayXd slidingPatternParameters = ArrayXd::Constant(6,-99);
+
     if (peakTestFlag == 1 && asymptoticFlag != 1)
     {
+        // Assume by default that all the prior parameters are used. 
+        // This represents the case of the peak test models (E), (F), (G).
+        
+        parametersMinima.resize(Ndimensions);
+        parametersMaxima.resize(Ndimensions);
+        parametersMinima << hyperParametersMinima;
+        parametersMaxima << hyperParametersMaxima; 
 
         if (Ndimensions == 2)
         {
@@ -279,16 +271,6 @@ int main(int argc, char *argv[])
             parametersMaxima << hyperParametersMaxima.segment(1,Ndimensions); 
         }
          
-        if (Ndimensions == 3 || Ndimensions == 5 || Ndimensions == 6)
-        {
-            // In this case the peak test contains models (E), (F), (G).
-
-            parametersMinima.resize(Ndimensions);
-            parametersMaxima.resize(Ndimensions);
-            parametersMinima << hyperParametersMinima;
-            parametersMaxima << hyperParametersMaxima; 
-        }
-
         if (Ndimensions == 7)
         {
             // This can be either model (D), or model (G)
@@ -302,13 +284,6 @@ int main(int argc, char *argv[])
                 parametersMaxima.resize(Ndimensions);
                 parametersMinima << hyperParametersMinima.segment(0,Ndimensions);
                 parametersMaxima << hyperParametersMaxima.segment(0,Ndimensions);
-            }
-            else
-            {
-                parametersMinima.resize(Ndimensions);
-                parametersMaxima.resize(Ndimensions);
-                parametersMinima << hyperParametersMinima;
-                parametersMaxima << hyperParametersMaxima; 
             }
         }
 
@@ -332,39 +307,81 @@ int main(int argc, char *argv[])
                 parametersMinima << hyperParametersMinima.segment(0,Ndimensions);
                 parametersMaxima << hyperParametersMaxima.segment(0,Ndimensions); 
             }
-            else
-            {
-                // The profile is a Lorentzian.
-
-                parametersMinima.resize(Ndimensions);
-                parametersMaxima.resize(Ndimensions);
-                parametersMinima << hyperParametersMinima;
-                parametersMaxima << hyperParametersMaxima; 
-            }
         }
     }
     else
     {
-        parametersMinima.resize(Ndimensions);
-        parametersMaxima.resize(Ndimensions);
-        parametersMinima << hyperParametersMinima;
-        parametersMaxima << hyperParametersMaxima; 
+        // Consider the case of the sliding pattern model separately
+
+        if (asymptoticFlag == 1)
+        {
+            // Assume that the first two parameters are always free (namely frequency centroid and peak profile height).
+
+            parametersMinima.resize(2);
+            parametersMaxima.resize(2);
+            parametersMinima << hyperParametersMinima.segment(0,2);
+            parametersMaxima << hyperParametersMaxima.segment(0,2); 
+            Ndimensions = 2;
+
+
+            // If DeltaNu, deltaNu02, deltaNu01, deltaNu03, rotationalSplitting and cosi are free parameters, add them to the prior list,
+            // otherwise set their value to the one given in the prior file.
+            // If a value of +99 is used for any of the small frequency spacings deltaNu02, deltaNu01, deltaNu03, this implies that
+            // the corresponding peak is excluded from the sliding pattern.
+
+            for (int freeParameter = 2; freeParameter < hyperParametersMinima.size(); freeParameter++)
+            {
+                if (hyperParametersMinima(freeParameter) != hyperParametersMaxima(freeParameter))
+                {
+                    Ndimensions++;
+                    parametersMinima.conservativeResize(Ndimensions);
+                    parametersMaxima.conservativeResize(Ndimensions);
+                    parametersMinima(Ndimensions-1) = hyperParametersMinima(freeParameter);
+                    parametersMaxima(Ndimensions-1) = hyperParametersMaxima(freeParameter);
+                }
+                else
+                {
+                    slidingPatternParameters(freeParameter-2) = hyperParametersMinima(freeParameter);
+                }
+            }
+        }
+        else
+        {
+            parametersMinima.resize(Ndimensions);
+            parametersMaxima.resize(Ndimensions);
+            parametersMinima << hyperParametersMinima;
+            parametersMaxima << hyperParametersMaxima; 
+        }
     }
-   
+
     UniformPrior uniformPrior(parametersMinima, parametersMaxima);
     ptrPriors[0] = &uniformPrior;
     
     string fullPathHyperParameters = outputPathPrefix + "hyperParametersUniform.txt";
     uniformPrior.writeHyperParametersToFile(fullPathHyperParameters);
 
-    
-    // If the fit has to be done in a multi-modal low-dimensional manner, or it is a peak test, or an asymptotic pattern fit, then trim the 
+
+    // If the fit has to be done in a uni-modal high-dimensional manner, then expect an input file to provide the frequency boundaries to perform the fit.
+    // In this case the PSD will be trimmed according to an input frequency range. The same applies if the fit is a multi-modal sliding pattern fit.
+    // If the fit has to be done in a standard multi-modal low-dimensional manner, or it is a peak test, then trim the 
     // dataset according to the input prior for the frequency range. 
-    
-    if (peakLinewidth >= 0.0 || peakTestFlag == 1 || asymptoticFlag == 1) 
+
+    if ((peakTestFlag != 1 && peakLinewidth < 0.0) || asymptoticFlag == 1)
     {
-        // Trim input dataset in the given frequency range
-        
+        // Read input frequency range of the PSD
+
+        inputFileName = outputDirName + "frequencyRange_" + runNumber + ".txt";
+        File::openInputFile(inputFile, inputFileName);
+        File::sniffFile(inputFile, Nrows, Ncols);
+        ArrayXXd frequencyRange(Nrows, Ncols);
+        frequencyRange = File::arrayXXdFromFile(inputFile, Nrows, Ncols);
+        inputFile.close();
+
+        lowerFrequency = frequencyRange(0);        // muHz
+        upperFrequency = frequencyRange(1);        // muHz
+    }
+    else
+    {
         lowerFrequency = hyperParameters(0,0);        // muHz
         
         if (Ndimensions == 7)
@@ -383,16 +400,20 @@ int main(int argc, char *argv[])
             upperFrequency = hyperParameters(0,1);        // muHz
         }
 
-        vector<int> trimIndices = Functions::findArrayIndicesWithinBoundaries(covariates, lowerFrequency, upperFrequency);
-        int Nbins = trimIndices.size();
-        ArrayXd trimmedArray(Nbins);
-        trimmedArray = covariates.segment(trimIndices[0],Nbins);
-        covariates.resize(Nbins);
-        covariates = trimmedArray;
-        trimmedArray = observations.segment(trimIndices[0],Nbins);
-        observations.resize(Nbins);
-        observations = trimmedArray;
     }
+    
+    // Trim input dataset in the given frequency range
+    
+    vector<int> trimIndices = Functions::findArrayIndicesWithinBoundaries(covariates, lowerFrequency, upperFrequency);
+    int Nbins = trimIndices.size();
+    ArrayXd trimmedArray(Nbins);
+    
+    trimmedArray = covariates.segment(trimIndices[0],Nbins);
+    covariates.resize(Nbins);
+    covariates = trimmedArray;
+    trimmedArray = observations.segment(trimIndices[0],Nbins);
+    observations.resize(Nbins);
+    observations = trimmedArray;
 
     cout << " Frequency range: [" << setprecision(4) << covariates.minCoeff() << ", " 
          << covariates.maxCoeff() << "] muHz" << endl;
@@ -426,7 +447,9 @@ int main(int argc, char *argv[])
     if (asymptoticFlag == 1)
     {
         string asymptoticParametersFileName = baseOutputDirName + "asymptoticParameters.txt";
-        model = new AsymptoticPatternModel(covariates, peakLinewidth, asymptoticParametersFileName, backgroundModel);
+        string gaussianEnvelopeParametersFileName = baseOutputDirName + "gaussianEnvelopeParameters.txt";
+        model = new SlidingPatternModel(covariates, peakLinewidth, slidingPatternParameters, 
+            asymptoticParametersFileName, gaussianEnvelopeParametersFileName, backgroundModel);
     }
     else
     {
@@ -492,8 +515,8 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    // Use the frequency resolution as peak linewidth for the multi-modal fitting. Useful in case
-                    // narrow (unresolved) mixed modes are expected.
+                    // Use the frequency resolution as peak linewidth for the multi-modal fitting (linewidth = 0). 
+                    // This is useful in case narrow (unresolved) mixed modes are expected.
 
                     if (Nparameters == 2) 
                     {
@@ -511,7 +534,7 @@ int main(int argc, char *argv[])
 
                 if (peakLinewidth == -1)
                 {
-                    // No input linewidth has to be used (< 0). In this case perform the standard uni-modal fitting 
+                    // No input linewidth has to be used (= -1). In this case perform the standard uni-modal fitting 
                     // by assuming a mixture of Lorentzian profiles without rotational splitting.
 
                     Nresolved = Ndimensions/3;
@@ -519,8 +542,8 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    // No input linewidth has to be used (< 0). In this case perform the standard uni-modal fitting 
-                    // by assuming a mixture of Lorentzian profiles with rotational splitting.
+                    // No input linewidth has to be used (< 0 but != -1). In this case perform the standard uni-modal fitting 
+                    // by assuming a mixture of Lorentzian profiles and include also the effect of rotation.
                     // This requires an input list of angular degrees to be fed into the peak bagging model.
 
                     Nresolved = (Ndimensions-2)/3;
@@ -630,10 +653,19 @@ int main(int argc, char *argv[])
 
     
     // Fraction by which each axis in an ellipsoid has to be enlarged
-    // It can be a number >= 0, where 0 means no enlargement. configuringParameters(5)
+    // It can be a number >= 0, where 0 means no enlargement.
     // Calibration from Corsaro et al. (2018)
     
-    double initialEnlargementFraction = 0.369*pow(Ndimensions,0.574);    
+    double initialEnlargementFraction;
+    
+    if (initialNobjects <= 500)    
+    {
+        initialEnlargementFraction = 0.369*pow(Ndimensions,0.574);
+    }
+    else
+    {
+        initialEnlargementFraction = 0.310*pow(Ndimensions,0.598);    
+    }
 
     
     // Exponent for remaining prior mass in ellipsoid enlargement fraction.
@@ -651,7 +683,7 @@ int main(int argc, char *argv[])
     // This is used only in the multi-modal approach.
     
     int maxNiterations = 0; 
-    if (peakLinewidth >= 0 && peakTestFlag != 1 && asymptoticFlag != 1)
+    if ((peakLinewidth >= 0 && peakTestFlag != 1) || asymptoticFlag == 1)
     {
         maxNiterations = configuringParameters(8);
     }
@@ -722,6 +754,11 @@ int main(int argc, char *argv[])
         if (Ndimensions == 5)
         {
             nestedSampler.outputFile << "F" << endl;
+        }
+    
+        if (Ndimensions == 6)
+        {
+            nestedSampler.outputFile << "G" << endl;
         }
     }
     else
