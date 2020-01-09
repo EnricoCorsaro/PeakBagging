@@ -102,7 +102,7 @@ void SlidingPatternModel::predict(RefArrayXd predictions, RefArrayXd const model
     double DeltaNu;
     double deltaNu02;
     double deltaNu01;
-    double deltaNu03;
+    double deltaNu13;
     double rotationalSplitting;
     double cosi;
 
@@ -233,14 +233,14 @@ void SlidingPatternModel::predict(RefArrayXd predictions, RefArrayXd const model
             // Octupole mode excluded from the pattern
             
             includeOctupoleModes = false;
-            deltaNu03 = 0;
+            deltaNu13 = 0;
         }
         else
         {
             // Octupole mode included in the pattern
 
             includeOctupoleModes = true;
-            deltaNu03 = slidingPatternParameters(3);
+            deltaNu13 = slidingPatternParameters(3);
         }
     }
     else
@@ -253,13 +253,13 @@ void SlidingPatternModel::predict(RefArrayXd predictions, RefArrayXd const model
         {
             // Rotation is included
 
-            deltaNu03 = modelParameters(NfreeParameters-3);
+            deltaNu13 = modelParameters(NfreeParameters-3);
         }
         else
         {
             // Rotation is not included
 
-            deltaNu03 = modelParameters(NfreeParameters-1);
+            deltaNu13 = modelParameters(NfreeParameters-1);
         }
     }
 
@@ -364,7 +364,7 @@ void SlidingPatternModel::predict(RefArrayXd predictions, RefArrayXd const model
         {
             // l = 3
             
-            Functions::modeProfile(singleModePrediction, covariates, centralFrequency + mode*DeltaNu - deltaNu01 - deltaNu03, height*octupoleToRadialHeightRatio, linewidth);
+            Functions::modeProfile(singleModePrediction, covariates, centralFrequency + mode*DeltaNu + DeltaNu/2.0 - deltaNu01 - deltaNu13, height*octupoleToRadialHeightRatio, linewidth);
             predictions += singleModePrediction; 
         }
     }
