@@ -97,6 +97,7 @@ void PeakTestDipoleRotationModel::predict(RefArrayXd predictions, RefArrayXd con
     double modeVisibilityComponent = cosi*cosi;
     Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency, 
                                         amplitude*sqrt(modeVisibilityComponent), linewidth);
+
     predictions += singleModePrediction;
 
     
@@ -106,6 +107,7 @@ void PeakTestDipoleRotationModel::predict(RefArrayXd predictions, RefArrayXd con
     modeVisibilityComponent = 0.5*(1.0 - cosi*cosi);
     Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency + rotationalSplitting, 
                                         amplitude*sqrt(modeVisibilityComponent), linewidth);
+
     predictions += singleModePrediction;
     
    
@@ -113,6 +115,7 @@ void PeakTestDipoleRotationModel::predict(RefArrayXd predictions, RefArrayXd con
 
     Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency - rotationalSplitting, 
                                         amplitude*sqrt(modeVisibilityComponent), linewidth);
+
     predictions += singleModePrediction;
 
         

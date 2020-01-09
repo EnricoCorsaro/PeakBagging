@@ -82,17 +82,17 @@ void PeakTestDupletModel::predict(RefArrayXd predictions, RefArrayXd const model
 
     // Initialize parameters of the oscillation mode
 
-    double centralFrequency1 = modelParameters(0);
+    double centralFrequency = modelParameters(0);
     double amplitude1 = modelParameters(1);
     double linewidth1 = modelParameters(2);
     double dupletSplitting = modelParameters(3);
     double amplitude2 = modelParameters(4);
     double linewidth2 = modelParameters(5);
 
-    Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency1, amplitude1, linewidth1);
+    Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency, amplitude1, linewidth1);
     predictions += singleModePrediction;
     
-    Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency1 + dupletSplitting, amplitude2, linewidth2);
+    Functions::modeProfileWithAmplitude(singleModePrediction, covariates, centralFrequency + dupletSplitting, amplitude2, linewidth2);
     predictions += singleModePrediction;
 
     
