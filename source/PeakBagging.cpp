@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     {
         if (peakTestFlag == 1)
         {
-            if (Nparameters < 2 || Nparameters > 7)
+            if (Nparameters > 7)
             {
                 cerr << "Wrong number of input prior hyper-parameters." << endl;
                 cerr << "When performing a peak significance test, the code allows for the following cases: " << endl;
@@ -250,27 +250,13 @@ int main(int argc, char *argv[])
     if (peakTestFlag == 1 && asymptoticFlag != 1)
     {
         // Assume by default that all the prior parameters are used. 
-        // This represents the case of the peak test models (E), (F), (G).
+        // This represents the case of the peak test models (A), (E), (F), (G).
         
         parametersMinima.resize(Ndimensions);
         parametersMaxima.resize(Ndimensions);
         parametersMinima << hyperParametersMinima;
         parametersMaxima << hyperParametersMaxima; 
 
-        if (Ndimensions == 2)
-        {
-            // In this case the peak test contains only the background factor (A).
-            // The first prior parameter here represents the input frequency range,
-            // and has to be ignored. Then the effective number of dimensions is 1.
-
-            Ndimensions = 1;
-
-            parametersMinima.resize(Ndimensions);
-            parametersMaxima.resize(Ndimensions);
-            parametersMinima << hyperParametersMinima.segment(1,Ndimensions);
-            parametersMaxima << hyperParametersMaxima.segment(1,Ndimensions); 
-        }
-         
         if (Ndimensions == 7)
         {
             // This can be either model (D), or model (G)
@@ -362,11 +348,12 @@ int main(int argc, char *argv[])
 
 
     // If the fit has to be done in a uni-modal high-dimensional manner, then expect an input file to provide the frequency boundaries to perform the fit.
-    // In this case the PSD will be trimmed according to an input frequency range. The same applies if the fit is a multi-modal sliding pattern fit.
-    // If the fit has to be done in a standard multi-modal low-dimensional manner, or it is a peak test, then trim the 
-    // dataset according to the input prior for the frequency range. 
+    // In this case the PSD will be trimmed according to an input frequency range. The same applies if the fit is a multi-modal sliding pattern fit and
+    // to the suit of peak testing models.
+    // Otherwise, if the fit has to be done in a standard multi-modal low-dimensional manner then trim the dataset according to the input prior 
+    // for the frequency range. 
 
-    if ((peakTestFlag != 1 && peakLinewidth < 0.0) || asymptoticFlag == 1)
+    if ((peakTestFlag != 1 && peakLinewidth < 0.0) || asymptoticFlag == 1 || peakTestFlag == 1)
     {
         // Read input frequency range of the PSD
 
@@ -383,23 +370,16 @@ int main(int argc, char *argv[])
     else
     {
         lowerFrequency = hyperParameters(0,0);        // muHz
-        
-        if (Ndimensions == 7)
+        upperFrequency = hyperParameters(0,1);
+       
+        if (Ndimensions == 3)
         {
-            // For the peak test model having two Lorentzian profiles
-            // take as the lower frequency of the range the lower
-            // prior bound of the first frequency centroid and as 
-            // the upper frequency of the range, the upper prior
-            // bound of the frequency centroid of the second
-            // Lorentzian profile (the one at higher frequency).
+            // For the double Lorentzian multi-modal fit, take as the lower frequency bound
+            // the lower prior bound for the radial mode frequency minus the upper prior bound
+            // for the small spacing deltaNu02.
 
-            upperFrequency = hyperParameters(3,1);        // muHz
+            lowerFrequency = fabs(hyperParameters(0,0) - hyperParameters(2,1));
         }
-        else
-        {
-            upperFrequency = hyperParameters(0,1);        // muHz
-        }
-
     }
     
     // Trim input dataset in the given frequency range
@@ -456,7 +436,7 @@ int main(int argc, char *argv[])
         if (peakTestFlag == 1)
         {
             // Set the model to perform the peak significance test. This can be one of the
-            //  models (A), (B), (C), (D), (E), (F), depending on the number of
+            //  models (A), (B), (C), (D), (E), (F), (G), depending on the number of
             // dimensions as set out from the input prior list.
            
             if (Ndimensions == 1)
@@ -500,32 +480,22 @@ int main(int argc, char *argv[])
         {
             if (peakLinewidth >= 0)
             {
-                if (peakLinewidth > 0)
+                if (peakLinewidth == 0)
                 {
-                    // Set the linewidth of the profile for the multi-modal fitting to an input value > 0.
-
-                    if (Nparameters == 2) 
-                    {
-                        model = new SingleLorentzianFixedLinewidthModel(covariates, peakLinewidth, backgroundModel);
-                    }
-                    else
-                    {
-                        model = new DoubleLorentzianFixedLinewidthModel(covariates, peakLinewidth, backgroundModel);
-                    }
+                    peakLinewidth = frequencyResolution;
+                } 
+            
+                // If the input linewidth is < 0, use the frequency resolution as peak linewidth for the multi-modal fitting (linewidth = 0). 
+                // This is useful in case narrow (unresolved) mixed modes are expected.
+               
+                if (Nparameters == 2) 
+                {
+                    model = new SingleLorentzianFixedLinewidthModel(covariates, peakLinewidth, backgroundModel);
                 }
                 else
                 {
-                    // Use the frequency resolution as peak linewidth for the multi-modal fitting (linewidth = 0). 
-                    // This is useful in case narrow (unresolved) mixed modes are expected.
-
-                    if (Nparameters == 2) 
-                    {
-                        model = new SingleLorentzianFixedLinewidthModel(covariates, frequencyResolution, backgroundModel);
-                    }
-                    else
-                    {
-                        model = new DoubleLorentzianFixedLinewidthModel(covariates, frequencyResolution, backgroundModel);
-                    }
+                    string asymptoticParametersFileName = baseOutputDirName + "asymptoticParameters.txt";
+                    model = new DoubleLorentzianFixedLinewidthModel(covariates, peakLinewidth, backgroundModel, asymptoticParametersFileName);
                 }
             }
             else
@@ -713,7 +683,7 @@ int main(int argc, char *argv[])
     nestedSampler.outputFile << "# Row #2: Catalog and Star ID" << endl;
     nestedSampler.outputFile << "# Row #3: Run Directory" << endl;
     nestedSampler.outputFile << "# Row #4: Run Number" << endl;
-    nestedSampler.outputFile << "# Row #5: Peak significance test (from A to E, 0 if not a test)" << endl;
+    nestedSampler.outputFile << "# Row #5: Peak significance test (from A to G, 0 if not a test)" << endl;
     nestedSampler.outputFile << "# Row #6: Asymptotic pattern fit (1 if activated, 0 otherwise)" << endl;
     nestedSampler.outputFile << "# Row #7: Background model adopted" << endl;
     nestedSampler.outputFile << "# Row #8: Peak linewidth in muHz (0 if uni-modal peak bagging or peak test)" << endl;
@@ -783,14 +753,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        if (peakLinewidth > 0)
-        {
-            nestedSampler.outputFile << setprecision(3) << peakLinewidth << endl;
-        }
-        else
-        {
-            nestedSampler.outputFile << setprecision(3) << frequencyResolution << endl;
-        }
+        nestedSampler.outputFile << setprecision(3) << peakLinewidth << endl;
     }
 
     nestedSampler.outputFile.close();
