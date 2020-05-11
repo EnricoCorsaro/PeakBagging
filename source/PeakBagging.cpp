@@ -222,6 +222,11 @@ int main(int argc, char *argv[])
         hyperParameters.conservativeResize(Nparameters,Ncols);
     }
 
+    cerr << "-------------------------------------------------- " << endl;
+    cerr << " Reading prior file " + inputPriorBaseName + "_" + runNumber + ".txt" << endl;
+    cerr << "-------------------------------------------------- " << endl;
+    cerr << " " << endl;
+
     hyperParameters = File::arrayXXdFromFile(inputFile, Nparameters, Ncols);
     inputFile.close();
     
