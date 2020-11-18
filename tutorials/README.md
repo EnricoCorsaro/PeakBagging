@@ -26,12 +26,14 @@ In this tutorial you will be able to perform a multi-modal fit using a single Lo
 
 **WARNING**: make sure to run this tutorial only once you have already executed the steps #1, #2, #3, #5 from the previous tutorial.
 
-![Multi-modal fit](https://raw.githubusercontent.com/EnricoCorsaro/PeakBagging/master/tutorials/KIC012008916_Islands.png)
+<img width="500" src="https://raw.githubusercontent.com/EnricoCorsaro/PeakBagging/master/tutorials/KIC012008916_Islands.png"/>
+</p>
 
 To run the tutorial follow the procedure:
 
-1. Go to `PeakBagging/build/`
-2. Execute the code for the multi-modal functionality by using the command line 
+1. Create an empty directory labeled `0` inside `KIC012008916/isla/`
+2. Go to `PeakBagging/build/`
+3. Execute the code for the multi-modal functionality by using the command line
 `./peakbagging KIC 012008916 isla 0 ThreeHarvey prior_hyperParameters 0.034 0 0 0`
 
-In this case 0.034 is in the linewidth (in $\mu$Hz) used for the Lorentzian profile, while the remaining flags are kept deactivated. The plot shows how a single Lorentzian profile is capable of reproducing the oscillation peak structures that are present in the data within the inspected frequency range (compare this sampling with the plot presented in the first tutorial).
+In this case 0.034 is in the linewidth (in \mu Hz) used for the Lorentzian profile, while the remaining flags are kept deactivated. The plot shows how a single Lorentzian profile is capable of reproducing the oscillation peak structures that are present in the data within the inspected frequency range (compare this sampling with the plot presented in the first tutorial).
