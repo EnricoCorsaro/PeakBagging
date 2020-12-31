@@ -12,10 +12,14 @@ To run the tutorial follow the procedure:
 4. Create the empty directories labeled `0` and `0A` inside `KIC012008916/pb/`
 5. Move the folder `KIC012008916` (and all its content) under `PeakBagging/results/`
 6. Go to `PeakBagging/build/`
-7. Execute the code for the first run (including all peaks) by using the command line 
-`./peakbagging KIC 012008916 pb 0 ThreeHarvey prior_hyperParameters -1 0 0 0`
-8. Execute the code for the second run (excluding the peak to be tested) by using the command line 
-`./peakbagging KIC 012008916 pb 0A ThreeHarvey prior_hyperParameters -1 0 0 0`
+7. Execute the code for the first run (including all peaks) by using the command line
+```bash 
+./peakbagging KIC 012008916 pb 0 ThreeHarvey prior_hyperParameters -1 0 0 0
+```
+8. Execute the code for the second run (excluding the peak to be tested) by using the command line
+```bash
+./peakbagging KIC 012008916 pb 0A ThreeHarvey prior_hyperParameters -1 0 0 0
+```
 9. Compare the output Bayesian evidences from the two models to check whether the peak is significant or not
 10. Once the computation is completed, you can plot the results with Python by using `plot_peakbagging.py` provided in the tutorials folder. The routine is set up in a way that it will plot the results from your folder `0`. Please make sure that all paths set inside the Python routines match correctly with your actual working paths for PeakBagging.
 
@@ -34,6 +38,8 @@ To run the tutorial follow the procedure:
 1. Create an empty directory labeled `0` inside `KIC012008916/isla/`
 2. Go to `PeakBagging/build/`
 3. Execute the code for the multi-modal functionality by using the command line
-`./peakbagging KIC 012008916 isla 0 ThreeHarvey prior_hyperParameters 0.034 0 0 0`
+```bash
+./peakbagging KIC 012008916 isla 0 ThreeHarvey prior_hyperParameters 0.034 0 0 0
+```
 
-In this case 0.034 is in the linewidth (in \mu Hz) used for the Lorentzian profile, while the remaining flags are kept deactivated. The plot shows how a single Lorentzian profile is capable of reproducing the oscillation peak structures that are present in the data within the inspected frequency range (compare this sampling with the plot presented in the first tutorial).
+In this case 0.034 is the linewidth (in microHz) used for the Lorentzian profile, while the remaining flags are kept deactivated. The plot shows how a single Lorentzian profile is capable of reproducing the oscillation peak structures that are present in the data within the inspected frequency range (compare this sampling with the plot presented in the first tutorial).
