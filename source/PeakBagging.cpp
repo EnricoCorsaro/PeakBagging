@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     string outputDirName = baseOutputDirName + outputSubDirName + "/";
     string outputPathPrefix = outputDirName + runNumber + "/peakbagging_";
    
-    cerr << "------------------------------------------------------ " << endl;
+    cout << "------------------------------------------------------ " << endl;
     if (asymptoticFlag == 1)
     {
         cout << " Performing asymptotic pattern fit for " + CatalogID + StarID << endl;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    cerr << "------------------------------------------------------ " << endl;
+    cout << "------------------------------------------------------ " << endl;
     cout << endl;
 
    
@@ -222,10 +222,10 @@ int main(int argc, char *argv[])
         hyperParameters.conservativeResize(Nparameters,Ncols);
     }
 
-    cerr << "-------------------------------------------------- " << endl;
-    cerr << " Reading prior file " + inputPriorBaseName + "_" + runNumber + ".txt" << endl;
-    cerr << "-------------------------------------------------- " << endl;
-    cerr << " " << endl;
+    cout << "-------------------------------------------------- " << endl;
+    cout << " Reading prior file " + inputPriorBaseName + "_" + runNumber + ".txt" << endl;
+    cout << "-------------------------------------------------- " << endl;
+    cout << " " << endl;
 
     hyperParameters = File::arrayXXdFromFile(inputFile, Nparameters, Ncols);
     inputFile.close();
@@ -786,7 +786,7 @@ int main(int argc, char *argv[])
         results.writeParametersSummaryToFile("parameterSummary.txt", credibleLevel, writeMarginalDistributionToFile);
     }
 
-    cerr << "Process #" << runNumber << " under subdir: " + outputSubDirName + " has been completed." << endl;
+    cout << "Process # " << runNumber << " under subdir: " + outputSubDirName + " has been completed." << endl;
 
     return EXIT_SUCCESS;
 }
