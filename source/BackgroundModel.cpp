@@ -199,7 +199,7 @@ void BackgroundModel::writeBackgroundPredictionToFile(const string outputFileNam
 
 void BackgroundModel::predict(RefArrayXd predictions)
 {
-    // Create response function modulating the sampling rate of input Kepler LC data
+    // Create response function modulating the sampling rate of input data
 
     // NyquistFrequency = 8496.355743094671     muHz     // Kepler SC
     // NyquistFrequency = 283.2116656017908     muHz     // Kepler LC

@@ -604,12 +604,12 @@ int main(int argc, char *argv[])
 
     // Initial number of live points
     
-    int initialNobjects = configuringParameters(0);
+    int initialNlivePoints = configuringParameters(0);
 
     
     // Minimum number of live points 
     
-    int minNobjects = configuringParameters(1);
+    int minNlivePoints = configuringParameters(1);
     
     
     // Maximum number of attempts when trying to draw a new sampling point
@@ -628,18 +628,24 @@ int main(int argc, char *argv[])
 
     
     // Fraction by which each axis in an ellipsoid has to be enlarged
-    // It can be a number >= 0, where 0 means no enlargement.
+    // It can be a number >= 0, where 0 means no enlargement. configuringParameters(5)
     // Calibration from Corsaro et al. (2018)
-    
+   
     double initialEnlargementFraction;
-    
-    if (initialNobjects <= 500)    
+
+    if (initialNlivePoints <= 500)
     {
-        initialEnlargementFraction = 0.369*pow(Ndimensions,0.574);
+        cerr << endl;
+        cerr << " Using the calibration for 500 live points." << endl;
+        cerr << endl;
+        initialEnlargementFraction = 0.369*pow(Ndimensions,0.574);  
     }
     else
     {
-        initialEnlargementFraction = 0.310*pow(Ndimensions,0.598);    
+        cerr << endl;
+        cerr << " Using the calibration for 1000 live points." << endl;
+        cerr << endl;
+        initialEnlargementFraction = 0.310*pow(Ndimensions,0.598);  
     }
 
     
@@ -665,7 +671,7 @@ int main(int argc, char *argv[])
     
 
     MultiEllipsoidSampler nestedSampler(printOnTheScreen, ptrPriors, likelihood, myMetric, clusterer, 
-                                        initialNobjects, minNobjects, initialEnlargementFraction, shrinkingRate);
+                                        initialNlivePoints, minNlivePoints, initialEnlargementFraction, shrinkingRate);
     
     double tolerance = 1.e2;
     double exponent = 0.4;

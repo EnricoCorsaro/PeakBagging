@@ -30,6 +30,8 @@ class BackgroundModel : public Model
         void writeBackgroundPredictionToFile(const string outputFileName);
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters){};
+        virtual void computeVariance(RefArrayXd modelVariance, const RefArrayXd modelParameters){};
+        
         void predict(RefArrayXd predictions);
         void predictThreeHarveyColor(RefArrayXd predictions);
         void predictThreeHarvey(RefArrayXd predictions);
