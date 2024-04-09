@@ -24,6 +24,7 @@ class SingleLorentzianFixedLinewidthModel : public Model
         ~SingleLorentzianFixedLinewidthModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
+        virtual void computeVariance(RefArrayXd modelVariance, const RefArrayXd modelParameters){};
 
     protected:
     

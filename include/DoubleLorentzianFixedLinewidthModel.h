@@ -25,6 +25,7 @@ class DoubleLorentzianFixedLinewidthModel : public Model
         ~DoubleLorentzianFixedLinewidthModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
+        virtual void computeVariance(RefArrayXd modelVariance, const RefArrayXd modelParameters){};
         void readModeVisibilityFromFile(const string inputFileName);
 
     protected:

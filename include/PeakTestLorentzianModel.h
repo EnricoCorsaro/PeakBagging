@@ -24,6 +24,7 @@ class PeakTestLorentzianModel : public Model
         ~PeakTestLorentzianModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
+        virtual void computeVariance(RefArrayXd modelVariance, const RefArrayXd modelParameters){};
 
     protected:
     

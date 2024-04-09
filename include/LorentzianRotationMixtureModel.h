@@ -24,6 +24,7 @@ class LorentzianRotationMixtureModel : public Model
         ~LorentzianRotationMixtureModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
+        virtual void computeVariance(RefArrayXd modelVariance, const RefArrayXd modelParameters){};
         ArrayXd computeModeVisibility(const int angularDegree, const double cosi);
 
 

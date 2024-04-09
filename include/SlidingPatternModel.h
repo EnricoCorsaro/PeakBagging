@@ -26,6 +26,7 @@ class SlidingPatternModel : public Model
         ~SlidingPatternModel();
 
         virtual void predict(RefArrayXd predictions, RefArrayXd const modelParameters);
+        virtual void computeVariance(RefArrayXd modelVariance, const RefArrayXd modelParameters){};
         void readAsymptoticParametersFromFile(const string inputFileName);
         void readGaussianEnvelopeParametersFromFile(const string inputFileName);
 
